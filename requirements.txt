@@ -5,3 +5,4 @@ joblib
 tensorflow
 streamlit-lottie
 requests
+fpdf
