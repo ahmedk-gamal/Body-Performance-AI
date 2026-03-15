@@ -73,4 +73,6 @@ with st.form("main_form"):
         sys = st.number_input("الضغط الانقباضي", 80, 200, 120)
         dia = st.number_input("الضغط الانبساطي", 50, 120, 80)
         grip = st.number_input("قوة القبضة", 10.0, 100.0, 45.0)
-        sit_ups = st.number_input("عدد تمارين البطن", 0
+        sit_ups = st.number_input("عدد تمارين البطن", 0, 100, 35) # تأكدنا من غلق القوس هنا
+        jump = st.number_input("القفز الطويل (سم)", 50.0, 350.0, 210.0)
+        bend = st.number_input("مرونة الظهر (Sit & Bend)", -20.0, 50.0, 15.0)عدد تمارين البطن", 0
