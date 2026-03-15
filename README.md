@@ -23,7 +23,7 @@
 * **Regularization:** استخدام **Dropout (0.5)** و **Early Stopping** لضمان استقرار النموذج وتجنب الـ Overfitting.
 * **Optimizer:** المحسن `Adam` مع تقنية `ReduceLROnPlateau` للوصول لأفضل دقة ممكنة.
 
-![Model Architecture](https://www.researchgate.net/publication/344464132/figure/fig1/AS:942547190022144@1601729019681/A-simple-structure-of-a-Multi-layer-Perceptron-MLP-neural-network.png)
+![Model Architecture] (https://www.researchgate.net/publication/344464132/figure/fig1/AS:942547190022144@1601729019681/A-simple-structure-of-a-Multi-layer-Perceptron-MLP-neural-network.png)
 
 ##  🧪  Feature Engineering
 تم تحسين أداء النموذج من خلال ابتكار مؤشرات إضافية:
@@ -66,9 +66,9 @@ streamlit run app.py
 
 
 
-📊 البيانات (Dataset)
+## 📊 البيانات (Dataset)
 مجموعة بيانات ضخمة تحتوي على 13,393 سجل، تشمل اختبارات رياضية مثل (قوة القبضة، تمارين البطن، القفز الطويل) وقياسات حيوية (ضغط الدم، نسبة الدهون).
-
+##
 🔮 الرؤية المستقبلية (Future Roadmap)
 [ ] إضافة دعم للغة العربية بالكامل.
 
@@ -76,10 +76,10 @@ streamlit run app.py
 
 [ ] تطوير لوحة تحكم (Dashboard) لمتابعة التطور الزمني لأداء المستخدم.
 
-👨‍💼 صاحب المشروع (Author)
+##👨‍💼 صاحب المشروع (Author)
 Ahmed Khaled Gamal Hossam Eldien
 
-⭐️ إذا أعجبك هذا العمل، لا تنسَ دعم المشروع بـ Star على GitHub!
+##⭐️ إذا أعجبك هذا العمل، لا تنسَ دعم المشروع بـ Star على GitHub!
 
 
 
