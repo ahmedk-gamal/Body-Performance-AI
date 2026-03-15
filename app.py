@@ -177,4 +177,4 @@ if submit:
 
 # 7. تذييل الصفحة
 st.markdown("---")
-st.caption("تم تطوير هذا النظام باستخدام تقنيات الذكاء الاصطناعي لتحسين جودة الحياة البدنية.")
+st.caption("The Greatest Wealth is Health")
