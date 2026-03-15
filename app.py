@@ -3,8 +3,10 @@ import pandas as pd
 import numpy as np
 import joblib
 from tensorflow.keras.models import load_model
+from streamlit_lottie import st_lottie # مكتبة الانيميشن الجديدة
+import requests # عشان نجيب الانيميشن من النت
 
-# 1. إعدادات الصفحة
+# 1. إعدادات الصفحة الاحترافية
 st.set_page_config(
     page_title="Body Performance AI",
     page_icon="🧬",
@@ -12,80 +14,125 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# تحسين المظهر باستخدام CSS
+# 🎨 تحسين الـ CSS ليدعم الـ Dark & Light Mode وألوان متناسقة
 st.markdown("""
     <style>
-    .main { background-color: #f5f7f9; }
+    /* تغيير لون الزرار وتأثيره عند الوقوف عليه */
     .stButton>button { 
-        width: 100%; border-radius: 5px; height: 3em; 
-        background-color: #ff4b4b; color: white; font-weight: bold; font-size: 18px;
+        width: 100%; border-radius: 8px; height: 3.5em; 
+        background-color: #ff4b4b; color: white; font-weight: bold; 
+        font-size: 18px; border: none; transition: 0.3s;
     }
-    th { background-color: #ff4b4b !important; color: white !important; text-align: center !important; }
+    .stButton>button:hover {
+        background-color: #ff3333;
+        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4);
+    }
+    
+    /* تنسيق الجداول لتكون احترافية */
+    th { text-align: center !important; }
     td { text-align: center !important; }
+    
+    /* تنسيق الـ Metric Cards */
+    [data-testid="stMetricValue"] {
+        font-size: 32px;
+        font-weight: bold;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. نظام الترجمة (Translation System)
+# 2. دالة لتحميل انيميشن Lottie (القلب النابض)
+def load_lottieurl(url):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# رابط انيميشن قلب بينبض (ممكن تغيره برابط JSON تاني لو حبيت)
+lottie_heart = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_9czw5u1f.json")
+
+# 3. نظام الترجمة والنبذة التقنية (كما في النسخة السابقة)
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3843/3843205.png", width=100)
+    # عرض القلب النابض بدل الصورة الثابتة
+    if lottie_heart:
+        st_lottie(lottie_heart, height=120, key="heart")
+    else:
+        st.write("❤️") # fallback في حالة فشل التحميل
+
     lang = st.radio("🌐 Language / اللغة", ("English", "العربية"))
     st.markdown("---")
 
-# قاموس النصوص
 texts = {
     "English": {
         "title": "🧬 AI Body Performance System",
-        "sub": "Enter your data for a personalized fitness class and plan.",
-        "basic_h": "📋 Basic Information",
+        "sub": "Predict your fitness class and get a custom plan.",
+        "about_h": "🤖 About the Model",
+        "model_desc": "**Multi-Layer Perceptron (MLP)**\nA deep neural network with 3 hidden layers (512-256-128 neurons).",
+        "model_stats": "**Model Accuracy:** 82.19%\n**Dataset:** 13,000+ biological records.",
+        "dev": "👨‍💻 Developer",
+        "basic_h": "📋 Vital Data",
         "age": "Age", "gender": "Gender", "male": "Male", "female": "Female",
         "height": "Height (cm)", "weight": "Weight (kg)", "fat": "Body Fat %",
-        "test_h": "💪 Fitness Tests",
-        "sys": "Systolic BP", "dia": "Diastolic BP", "grip": "Grip Force",
-        "situps": "Sit-ups", "jump": "Broad Jump (cm)", "bend": "Sit & Bend",
-        "btn": "Analyze Data Now ✨",
-        "res_h": "📊 Final Result",
+        "test_h": "💪 Performance Tests",
+        "sys": "Systolic", "dia": "Diastolic", "grip": "Grip Force",
+        "situps": "Sit-ups", "jump": "Jump (cm)", "bend": "Flexibility",
+        "btn": "Analyze Now ✨",
+        "res_h": "📊 Results",
         "class": "Classification", "bmi": "BMI Index", "pp": "Pulse Pressure",
-        "plan_h": "🗓️ Weekly Integrated Plan",
-        "col_day": "Day", "col_exe": "Exercises", "col_nut": "Fruits/Veggies", "col_tip": "Nutrition Tip",
+        "plan_h": "🗓️ Your Weekly Plan",
+        "col_day": "Day", "col_exe": "Workout", "col_nut": "Veggies/Fruit", "col_tip": "Tip",
         "days": ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
-        "classes": ['A (Excellent)', 'B (Good)', 'C (Fair)', 'D (Poor)'],
-        "footer": "The Greatest Wealth is Health"
+        "classes": ['A (Excellent)', 'B (Good)', 'C (Fair)', 'D (Poor)']
     },
     "العربية": {
         "title": "🧬 نظام تحليل الأداء البدني الذكي",
-        "sub": "أدخل بياناتك للحصول على تصنيف بدني وخطة تدريب مخصصة.",
-        "basic_h": "📋 البيانات الأساسية",
+        "sub": "توقع فئتك البدنية واحصل على خطتك التدريبية المخصصة.",
+        "about_h": "🤖 عن النموذج المستخدم",
+        "model_desc": "**Perceptron متعدد الطبقات (MLP)**\nشبكة عصبية عميقة مكونة من 3 طبقات خفية (512-256-128 نيوترون).",
+        "model_stats": "**دقة النموذج:** 82.19%\n**البيانات:** أكثر من 13 ألف سجل حيوي.",
+        "dev": "👨‍💻 المطور",
+        "basic_h": "📋 البيانات الحيوية",
         "age": "العمر", "gender": "النوع", "male": "ذكر", "female": "أنثى",
         "height": "الطول (سم)", "weight": "الوزن (كجم)", "fat": "نسبة الدهون %",
-        "test_h": "💪 الاختبارات الرياضية",
+        "test_h": "💪 اختبارات الأداء",
         "sys": "الضغط الانقباضي", "dia": "الضغط الانبساطي", "grip": "قوة القبضة",
-        "situps": "تمارين البطن", "jump": "القفز الطويل (سم)", "bend": "مرونة الظهر",
-        "btn": "تحليل البيانات الآن ✨",
-        "res_h": "📊 النتيجة النهائية",
-        "class": "التصنيف البدني", "bmi": "مؤشر كتلة الجسم", "pp": "فرق الضغط",
+        "situps": "تمارين البطن", "jump": "القفز (سم)", "bend": "المرونة",
+        "btn": "حلل الآن ✨",
+        "res_h": "📊 النتائج",
+        "class": "التصنيف البدني", "bmi": "مؤشر الكتلة", "pp": "فرق الضغط",
         "plan_h": "🗓️ خطتك الأسبوعية المتكاملة",
-        "col_day": "اليوم", "col_exe": "التمارين", "col_nut": "فواكه وخضروات", "col_tip": "نصيحة التغذية",
+        "col_day": "اليوم", "col_exe": "التمرين", "col_nut": "الخضار/الفاكهة", "col_tip": "نصيحة",
         "days": ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
-        "classes": ['A (ممتاز)', 'B (جيد جداً)', 'C (جيد)', 'D (ضعيف)'],
-        "footer": "الصحة هي الثروة الحقيقية"
+        "classes": ['A (ممتاز)', 'B (جيد جداً)', 'C (جيد)', 'D (ضعيف)']
     }
 }
 t = texts[lang]
 
-# 3. تحميل الموديل والـ Scaler
+# عرض النبذة التقنية والمطور في السايد بار بناءً على اللغة
+with st.sidebar:
+    st.subheader(t["about_h"])
+    st.info(t["model_desc"])
+    st.write(t["model_stats"])
+    st.markdown("---")
+    st.subheader(t["dev"])
+    st.success("**Ahmed Khaled Gamal**")
+
+# 4. تحميل الموديل والـ Scaler (مع معالجة الأخطاء)
 @st.cache_resource
 def load_assets():
-    model = load_model('body_performance_model.keras')
-    scaler = joblib.load('scaler.pkl')
-    return model, scaler
+    try:
+        model = load_model('body_performance_model.keras')
+        scaler = joblib.load('scaler.pkl')
+        return model, scaler
+    except Exception as e:
+        return None, None
 
-try:
-    model, scaler = load_assets()
-except Exception as e:
-    st.error(f"Error loading model: {e}")
+model, scaler = load_assets()
+
+if model is None:
+    st.error("Error: Could not load model or scaler files. Ensure 'body_performance_model.keras' and 'scaler.pkl' are in the same directory.")
     st.stop()
 
-# 4. الواجهة الرئيسية
+# 5. الواجهة الرئيسية والمدخلات
 st.title(t["title"])
 st.markdown(t["sub"])
 
@@ -108,13 +155,18 @@ with st.form("main_form"):
         bend = st.number_input(t["bend"], -20.0, 50.0, 15.0)
     submit = st.form_submit_button(t["btn"])
 
-# 5. النتائج والجدول
+# 6. المعالجة وعرض النتائج
 if submit:
+    # Feature Engineering
     gender_val = 0 if gender == t["male"] else 1
     bmi = weight / ((height / 100) ** 2)
     pulse_pressure = sys - dia
+    
+    # تحضير البيانات للتوقع
     features = np.array([[age, gender_val, height, weight, fat, sys, dia, grip, sit_ups, bend, jump, bmi, pulse_pressure]])
     scaled_features = scaler.transform(features)
+    
+    # التوقع
     prediction = model.predict(scaled_features)
     class_idx = np.argmax(prediction)
     
@@ -125,34 +177,22 @@ if submit:
     c_res[1].metric(t["bmi"], f"{bmi:.2f}")
     c_res[2].metric(t["pp"], pulse_pressure)
 
-    # بناء بيانات الجدول بناءً على الفئة واللغة
+    # بيانات الجدول بناءً على الفئة واللغة
     if lang == "English":
-        plans = {
-            0: ["Push Day", "Pull Day", "Legs", "Active Rest", "HIIT", "Full Body", "Rest"],
-            1: ["Chest/Tri", "Back/Bi", "Rest", "Legs", "Shoulders", "Cardio", "Rest"],
-            2: ["Fast Walk", "Rest", "Bodyweight", "Fast Walk", "Rest", "Full Body", "Active"],
-            3: ["Light Walk", "Stretch", "Rest", "Light Walk", "Easy Cardio", "Light Walk", "Rest"]
-        }
-        nut = ["Banana/Berries", "Apple/Broccoli", "Avocado", "Kiwi", "Orange", "Pomegranate", "Seasonal"]
-        tips = ["High Carb", "High Protein", "Hydrate", "Vitamins", "Antioxidants", "Recovery", "Cheat Day"]
+        plans = {0:["Push Day","Pull Day","Legs","Active Rest","HIIT","Full Body","Rest"],
+                 1:["Chest/Tri","Back/Bi","Rest","Legs","Shoulders","Cardio","Rest"],
+                 2:["Fast Walk","Rest","Bodyweight","Fast Walk","Rest","Full Body","Active"],
+                 3:["Light Walk","Stretch","Rest","Light Walk","Easy Cardio","Light Walk","Rest"]}
+        nut = ["Banana/Berries","Apple/Broccoli","Avocado","Kiwi","Orange","Pomegranate","Seasonal"]
+        tips = ["High Carb","High Protein","Hydrate","Vitamins","Antioxidants","Recovery","Cheat Day"]
     else:
-        plans = {
-            0: ["دفع (صدر/أكتاف)", "سحب (ظهر/باي)", "أرجل", "راحة إيجابية", "HIIT", "فول بادي", "راحة"],
-            1: ["صدر + تراي", "ظهر + باي", "راحة", "أرجل", "أكتاف", "جري 40د", "راحة"],
-            2: ["مشي سريع", "راحة", "وزن جسم", "مشي سريع", "راحة", "تمارين شاملة", "نشاط حر"],
-            3: ["مشي خفيف", "إطالة", "راحة", "مشي خفيف", "تقوية بسيطة", "مشي خفيف", "راحة"]
-        }
-        nut = ["موز وتوت", "تفاح وبروكلي", "أفوكادو", "كيوي", "برتقال", "رمان", "فاكهة موسمية"]
-        tips = ["كارب عالي", "بروتين مكثف", "ترطيب", "فيتامينات", "مضادات أكسدة", "استشفاء", "يوم مفتوح"]
+        plans = {0:["دفع (صدر/أكتاف)","سحب (ظهر/باي)","أرجل","راحة إيجابية","HIIT","فول بادي","راحة"],
+                 1:["صدر + تراي","ظهر + باي","راحة","أرجل","أكتاف","جري 40د","راحة"],
+                 2:["مشي سريع","راحة","وزن جسم","مشي سريع","راحة","تمارين شاملة","نشاط حر"],
+                 3:["مشي خفيف","إطالة","راحة","مشي خفيف","تقوية بسيطة","مشي خفيف","راحة"]}
+        nut = ["موز وتوت","تفاح وبروكلي","أفوكادو","كيوي","برتقال","رمان","فاكهة موسمية"]
+        tips = ["كارب عالي","بروتين مكثف","ترطيب","فيتامينات","مضادات أكسدة","استشفاء","يوم مفتوح"]
 
-    df_data = {
-        t["col_day"]: t["days"],
-        t["col_exe"]: plans[class_idx],
-        t["col_nut"]: nut,
-        t["col_tip"]: tips
-    }
+    df_data = {t["col_day"]: t["days"], t["col_exe"]: plans[class_idx], t["col_nut"]: nut, t["col_tip"]: tips}
     st.markdown(f"### {t['plan_h']}")
     st.table(pd.DataFrame(df_data))
-
-st.markdown("---")
-st.caption(f"© 2026 Ahmed Khaled Gamal - {t['footer']}")
