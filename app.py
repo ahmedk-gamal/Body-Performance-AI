@@ -8,84 +8,108 @@ import requests
 from fpdf import FPDF 
 import base64
 
-# 1. إعدادات الصفحة بنمط Apple Health
-st.set_page_config(
-    page_title="Health AI | Apple Style",
-    page_icon="❤️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# 1. إعدادات الصفحة
+st.set_page_config(page_title="Health AI | Apple Style", page_icon="❤️", layout="wide")
 
-# 🎨 Apple Health Style CSS
+# 🎨 CSS المحسن (Apple Health Theme)
 st.markdown("""
     <style>
-    :root { --apple-red: #ff2d55; --apple-bg: #f2f2f7; }
-    .main { background-color: var(--apple-bg); }
+    :root { --apple-red: #ff2d55; }
     .stButton>button { 
         width: 100%; border-radius: 12px; height: 3.5em; 
-        background-color: #ff2d55; color: white; font-weight: 600; 
-        font-size: 18px; border: none; transition: 0.3s;
-        box-shadow: 0 4px 12px rgba(255, 45, 85, 0.2);
+        background-color: #ff2d55; color: white; font-weight: 600; border: none;
     }
-    .stButton>button:hover { 
-        background-color: #e6264d; 
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 45, 85, 0.3);
-    }
-    .social-links a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; padding: 5px; transition: 0.3s; }
-    .social-links a:hover { color: #ff2d55; }
-    th { background-color: #ff2d55 !important; color: white !important; text-align: center !important; }
-    td { text-align: center !important; }
+    .social-links a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; padding: 5px; }
+    th { background-color: #ff2d55 !important; color: white !important; }
     [data-testid="stMetricValue"] { color: #ff2d55; font-weight: 800; }
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# 2. دالة توليد تقرير PDF (تصحيح الـ Bytes)
+# 2. دالة توليد التقرير PDF (مع إضافة بيانات السايد بار داخل التقرير)
 def create_pdf(t, data_summary, plan_df):
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", 'B', 16)
-    pdf.cell(200, 10, txt="Body Performance AI - Health Report", ln=True, align='C')
-    pdf.ln(10)
+    
+    # رسم خط جانبي جمالي (Sidebar line in PDF)
+    pdf.set_draw_color(255, 45, 85) # Apple Red
+    pdf.set_line_width(1)
+    pdf.line(65, 10, 65, 280)
+
+    # --- القسم الجانبي في التقرير (Sidebar Section) ---
+    pdf.set_font("Arial", 'B', 12)
+    pdf.set_text_color(255, 45, 85)
+    pdf.text(10, 20, "DEVELOPER")
+    
+    pdf.set_font("Arial", '', 10)
+    pdf.set_text_color(0, 0, 0)
+    pdf.text(10, 30, "Ahmed Khaled Gamal")
     
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(200, 10, txt="1. Biological Metrics Summary:", ln=True)
-    pdf.set_font("Arial", '', 11)
-    for key, value in data_summary.items():
-        pdf.cell(200, 8, txt=f"- {key}: {value}", ln=True)
-    
-    pdf.ln(10)
-    pdf.set_font("Arial", 'B', 12)
-    pdf.cell(200, 10, txt="2. Weekly Fitness & Nutrition Plan:", ln=True)
-    pdf.ln(5)
-    
-    # Table headers
-    pdf.set_font("Arial", 'B', 10)
-    pdf.cell(25, 10, "Day", 1)
-    pdf.cell(60, 10, "Workout", 1)
-    pdf.cell(50, 10, "Nutrition", 1)
-    pdf.cell(55, 10, "Advice", 1)
-    pdf.ln()
-    
-    # Table rows
+    pdf.set_text_color(255, 45, 85)
+    pdf.text(10, 50, "CONTACT")
     pdf.set_font("Arial", '', 9)
+    pdf.set_text_color(0, 0, 255)
+    pdf.text(10, 60, "LinkedIn: k-ahmed-auc")
+    pdf.text(10, 68, "GitHub: ahmedk-gamal")
+
+    pdf.set_font("Arial", 'B', 12)
+    pdf.set_text_color(255, 45, 85)
+    pdf.text(10, 90, "TECH STACK")
+    pdf.set_font("Arial", '', 9)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_xy(10, 95)
+    pdf.multi_cell(50, 5, "Deep Learning (MLP)\nTensorFlow\nStreamlit UI")
+
+    # --- القسم الرئيسي في التقرير (Main Content) ---
+    pdf.set_xy(70, 20)
+    pdf.set_font("Arial", 'B', 20)
+    pdf.set_text_color(255, 45, 85)
+    pdf.cell(130, 10, txt="HEALTH AI REPORT", ln=True, align='L')
+    
+    pdf.set_xy(70, 40)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.set_text_color(0, 0, 0)
+    pdf.cell(130, 10, txt="1. Biological Metrics Summary:", ln=True)
+    
+    pdf.set_font("Arial", '', 11)
+    pdf.set_x(75)
+    for key, value in data_summary.items():
+        pdf.set_x(75)
+        pdf.cell(130, 8, txt=f"- {key}: {value}", ln=True)
+    
+    pdf.ln(10)
+    pdf.set_x(70)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(130, 10, txt="2. Weekly Personalized Plan:", ln=True)
+    
+    # جدول الخطة
+    pdf.set_font("Arial", 'B', 9)
+    pdf.set_fill_color(255, 45, 85)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_x(70)
+    pdf.cell(20, 10, "Day", 1, 0, 'C', True)
+    pdf.cell(40, 10, "Workout", 1, 0, 'C', True)
+    pdf.cell(35, 10, "Nutrition", 1, 0, 'C', True)
+    pdf.cell(35, 10, "Advice", 1, 1, 'C', True)
+    
+    pdf.set_font("Arial", '', 8)
+    pdf.set_text_color(0, 0, 0)
     for index, row in plan_df.iterrows():
-        pdf.cell(25, 10, str(row[0]), 1)
-        pdf.cell(60, 10, str(row[1]), 1)
-        pdf.cell(50, 10, str(row[2]), 1)
-        pdf.cell(55, 10, str(row[3]), 1)
+        pdf.set_x(70)
+        pdf.cell(20, 10, str(row[0]), 1)
+        pdf.cell(40, 10, str(row[1]), 1)
+        pdf.cell(35, 10, str(row[2]), 1)
+        pdf.cell(35, 10, str(row[3]), 1)
         pdf.ln()
         
-    return bytes(pdf.output()) # التعديل الصحيح لـ fpdf2
+    return bytes(pdf.output())
 
 # 3. تحميل الأصول (القلب والموديل)
 def load_lottieurl(url):
     try: return requests.get(url).json()
     except: return None
 
-lottie_heart = load_lottieurl("https://lottie.host/82334807-6c2e-4054-8e36-7c0a6b72a6b2/v8Y8yO5x20.json")
+lottie_heart = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_m6cu96.json")
 
 @st.cache_resource
 def load_assets():
@@ -97,9 +121,9 @@ def load_assets():
 
 model, scaler = load_assets()
 
-# 4. نظام اللغات
+# 4. نظام اللغات والسايد بار
 with st.sidebar:
-    if lottie_heart: st_lottie(lottie_heart, height=140, key="heart")
+    if lottie_heart: st_lottie(lottie_heart, height=150, key="heart_logo")
     lang = st.radio("🌐 Language / اللغة", ("English", "العربية"))
     st.markdown("---")
 
@@ -107,8 +131,8 @@ texts = {
     "English": {
         "title": "🧬 Health AI Analysis",
         "sub": "Predictive Health System inspired by Apple Health.",
-        "about_h": "🤖 Technology Stack",
-        "model_desc": "**Deep Learning (MLP)**\n3 Hidden Layers (512-256-128 neurons).",
+        "about_h": "🤖 Tech Stack",
+        "model_desc": "**Deep Learning (MLP)**\nNeural network with 3 hidden layers.",
         "dev_h": "👨‍💻 Developer",
         "btn": "Analyze & Generate Report ✨",
         "pdf_btn": "📥 Download Health Report (PDF)",
@@ -118,8 +142,8 @@ texts = {
     "العربية": {
         "title": "🧬 تحليل المؤشرات الصحية الذكي",
         "sub": "نظام تنبؤ صحي متطور بتصميم Apple Health.",
-        "about_h": "🤖 التقنيات المستخدمة",
-        "model_desc": "**التعلم العميق (MLP)**\nشبكة عصبية بـ 3 طبقات خفية (512-256-128 نيوترون).",
+        "about_h": "🤖 التقنيات",
+        "model_desc": "**التعلم العميق (MLP)**\nشبكة عصبية لتصنيف الحالة البدنية.",
         "dev_h": "👨‍💻 المطور",
         "btn": "تحليل واستخراج التقرير ✨",
         "pdf_btn": "📥 تحميل التقرير الطبي (PDF)",
@@ -147,7 +171,7 @@ st.title(t["title"])
 st.markdown(t["sub"])
 
 if model is None:
-    st.error("Model files not found! Ensure 'body_performance_model.keras' and 'scaler.pkl' are uploaded.")
+    st.error("Missing Model Files!")
     st.stop()
 
 with st.form("health_form"):
@@ -182,19 +206,17 @@ if submit:
     r2.metric("BMI", f"{bmi:.2f}")
     r3.metric("Pulse Pressure", pp)
 
-    workouts = {0:["Push Day","Pull Day","Legs","Recovery","HIIT","Power","Rest"],
-                1:["Chest/Tri","Back/Bi","Rest","Lower Body","Shoulders","Cardio","Rest"],
-                2:["Power Walk","Rest","Bodyweight","Power Walk","Rest","Circuit","Active"],
-                3:["Light Walk","Stretch","Rest","Light Walk","Yoga","Light Walk","Rest"]}
-    nut = ["Berries","Broccoli","Avocado","Kiwi","Carrots","Pomegranate","Mix"]
-    tips = ["High Carb","Protein","Hydrate","Complex Carbs","Antioxidants","Repair","Relax"]
-
-    df_plan = pd.DataFrame({"Day": ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"], "Workout": workouts[idx], "Nutrition": nut, "Advice": tips})
+    # بيانات الخطة للجدول والتقرير
+    plan_data = {
+        "Day": ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
+        "Workout": ["Push Day","Pull Day","Legs","Recovery","HIIT","Power","Rest"],
+        "Nutrition": ["Berries","Broccoli","Avocado","Kiwi","Carrots","Pomegranate","Mix"],
+        "Advice": ["Hydrate","Protein","Sleep","Fiber","Antiox","Repair","Relax"]
+    }
+    df_plan = pd.DataFrame(plan_data)
     st.table(df_plan)
     
-    report_data = {"Age": age, "Gender": gender, "BMI": f"{bmi:.2f}", "Fitness Class": t["classes"][idx]}
-    pdf_bytes = create_pdf(t, report_data, df_plan)
+    report_summary = {"Age": age, "Gender": gender, "BMI": f"{bmi:.2f}", "Fitness Class": t["classes"][idx]}
+    pdf_bytes = create_pdf(t, report_summary, df_plan)
     
-    st.download_button(label=t["pdf_btn"], data=pdf_bytes, file_name=f"Health_Report.pdf", mime="application/pdf")
-
-st.caption("© 2026 Ahmed Khaled Gamal | All Rights Reserved")
+    st.download_button(label=t["pdf_btn"], data=pdf_bytes, file_name=f"Health_Report_{age}.pdf", mime="application/pdf")
