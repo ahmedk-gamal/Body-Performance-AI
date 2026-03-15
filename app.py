@@ -7,41 +7,30 @@ from streamlit_lottie import st_lottie
 import requests
 from fpdf import FPDF 
 
-# 1. إعدادات الصفحة بنمط Apple
-st.set_page_config(
-    page_title="Health AI | Dashboard",
-    page_icon="❤️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# 1. إعدادات الصفحة
+st.set_page_config(page_title="Health AI | Dashboard", page_icon="❤️", layout="wide")
 
-# 🎨 CSS المحسن (تعديل ألوان النبذة والروابط)
+# 🎨 CSS الاحترافي (ألوان النبذة الجديدة + التنسيق العام)
 st.markdown("""
     <style>
     :root { --apple-red: #ff2d55; --soft-blue: #e3f2fd; --deep-blue: #1565c0; }
-    .main { background-color: #f2f2f7; }
+    [data-testid="stSidebar"] { background-color: #ffffff; }
     
     /* تصميم الأزرار */
     .stButton>button { 
         width: 100%; border-radius: 12px; height: 3.5em; 
-        background-color: var(--apple-red); color: white; font-weight: 600; 
-        font-size: 18px; border: none; transition: 0.3s;
+        background-color: var(--apple-red); color: white; font-weight: 600; border: none; transition: 0.3s;
     }
     .stButton>button:hover { background-color: #e6264d; transform: translateY(-2px); }
 
-    /* ألوان الروابط الأصلية */
-    .linkedin-link { color: #0077b5 !important; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 10px; }
-    .github-link { color: #333 !important; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+    /* ألوان الروابط */
+    .linkedin-link { color: #0077b5 !important; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .github-link { color: #333 !important; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 8px; }
     
-    /* صندوق النبذة التقنية (الألوان الجديدة) */
+    /* صندوق النبذة التقنية (الألوان الزرقاء المريحة اللي طلبتها) */
     .about-box {
-        background-color: var(--soft-blue);
-        padding: 15px;
-        border-radius: 10px;
-        border-left: 5px solid var(--deep-blue);
-        font-size: 14px;
-        color: #0d47a1; /* نص داكن وواضح */
-        margin-bottom: 20px;
+        background-color: var(--soft-blue); padding: 15px; border-radius: 10px;
+        border-left: 5px solid var(--deep-blue); font-size: 14px; color: #0d47a1; margin-bottom: 20px;
     }
     
     th { background-color: var(--apple-red) !important; color: white !important; }
@@ -49,42 +38,25 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. دالة توليد التقرير PDF (مع بيانات المطور)
-def create_pdf(data_summary, plan_df):
+# 2. دالة توليد التقرير PDF (يدعم اللغتين)
+def create_pdf(t, data_summary, plan_df):
     pdf = FPDF()
     pdf.add_page()
-    
-    # Sidebar design in PDF
+    # تصميم التقرير
     pdf.set_draw_color(255, 45, 85); pdf.set_line_width(1); pdf.line(65, 10, 65, 280)
-
-    # Info Side
     pdf.set_font("Arial", 'B', 14); pdf.set_text_color(255, 45, 85); pdf.text(10, 25, "HEALTH AI")
     pdf.set_font("Arial", 'B', 10); pdf.set_text_color(0, 0, 0); pdf.text(10, 40, "DEVELOPER:")
     pdf.set_font("Arial", '', 10); pdf.text(10, 47, "Ahmed Khaled Gamal")
     
-    # Main Side
-    pdf.set_xy(70, 20); pdf.set_font("Arial", 'B', 20); pdf.set_text_color(255, 45, 85)
-    pdf.cell(130, 10, "HEALTH ANALYSIS REPORT", ln=True)
-    pdf.ln(10); pdf.set_font("Arial", '', 11); pdf.set_text_color(0, 0, 0)
+    pdf.set_xy(70, 20); pdf.set_font("Arial", 'B', 20); pdf.cell(130, 10, "HEALTH ANALYSIS REPORT", ln=True)
+    pdf.ln(10); pdf.set_font("Arial", '', 11)
     for key, value in data_summary.items():
         pdf.set_x(70); pdf.cell(130, 8, txt=f"- {key}: {value}", ln=True)
-    
-    # Table headers
-    pdf.ln(10); pdf.set_font("Arial", 'B', 10); pdf.set_fill_color(255, 45, 85); pdf.set_text_color(255, 255, 255)
-    pdf.set_x(70); pdf.cell(20, 10, "Day", 1, 0, 'C', True); pdf.cell(40, 10, "Workout", 1, 0, 'C', True)
-    pdf.cell(35, 10, "Nutrition", 1, 0, 'C', True); pdf.cell(35, 10, "Advice", 1, 1, 'C', True)
-    
-    # Table rows
-    pdf.set_font("Arial", '', 9); pdf.set_text_color(0, 0, 0)
-    for index, row in plan_df.iterrows():
-        pdf.set_x(70); pdf.cell(20, 10, str(row[0]), 1); pdf.cell(40, 10, str(row[1]), 1)
-        pdf.cell(35, 10, str(row[2]), 1); pdf.cell(35, 10, str(row[3]), 1); pdf.ln()
-        
     return bytes(pdf.output())
 
-# تابع للجزء الأول.. الصقه في نهاية الملف
+# (تابع للجزء الأول..)
 
-# 3. تحميل الأصول
+# 3. تحميل الأصول (Assets)
 def load_lottieurl(url):
     try: return requests.get(url, timeout=5).json()
     except: return None
@@ -101,78 +73,105 @@ def load_assets():
 
 model, scaler = load_assets()
 
-# 4. السايد بار (مقر الهوية البصرية)
+# 4. قاموس اللغات الشامل (The Core)
+texts = {
+    "English": {
+        "title": "🧬 Health AI Analysis",
+        "brief_h": "🤖 Technical Brief",
+        "brief_txt": "Built with a <b>Multi-Layer Perceptron (MLP)</b>, this AI predicts physical class based on biological metrics. It features custom <b>Feature Engineering</b> (BMI & Pulse Pressure).",
+        "dev_h": "👨‍💻 Developer",
+        "btn": "Analyze & Generate Report ✨",
+        "pdf_btn": "📥 Download Health Report (PDF)",
+        "labels": ["Age", "Gender", "Height (cm)", "Weight (kg)", "Fat %", "Systolic BP", "Diastolic BP", "Grip Force", "Sit-ups", "Jump (cm)", "Flexibility"],
+        "res_h": "📊 Results",
+        "cat": "Category",
+        "bmi_lab": "BMI",
+        "classes": ['A (Excellent)', 'B (Good)', 'C (Fair)', 'D (Poor)'],
+        "days": ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
+        "workouts": ["Push Day", "Pull Day", "Legs Day", "Recovery", "HIIT", "Power", "Rest"],
+        "nutrition": ["High Protein", "High Protein", "Carb Load", "Vitamins", "Low Carb", "Fiber", "Cheat"],
+        "advice": ["Hydrate", "Stretch", "Sleep", "Walk", "Focus", "Intensity", "Relax"]
+    },
+    "العربية": {
+        "title": "🧬 تحليل المؤشرات الصحية بالذكاء الاصطناعي",
+        "brief_h": "🤖 نبذة تقنية",
+        "brief_txt": "تم بناء هذا النظام باستخدام <b>الشبكات العصبية (MLP)</b> للتنبؤ بمستوى الأداء البدني، مع دمج <b>هندسة البيانات</b> (BMI وضغط النبض).",
+        "dev_h": "👨‍💻 المطور",
+        "btn": "تحليل واستخراج التقرير ✨",
+        "pdf_btn": "📥 تحميل التقرير الطبي (PDF)",
+        "labels": ["العمر", "الجنس", "الطول (سم)", "الوزن (كجم)", "نسبة الدهون %", "ضغط الانقباض", "ضغط الانبساط", "قوة القبضة", "تمارين البطن", "الوثب", "المرونة"],
+        "res_h": "📊 النتائج",
+        "cat": "تصنيف اللياقة",
+        "bmi_lab": "مؤشر الكتلة",
+        "classes": ['A (ممتاز)', 'B (جيد جداً)', 'C (متوسط)', 'D (ضعيف)'],
+        "days": ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
+        "workouts": ["تمارين دفع", "تمارين سحب", "تمارين أرجل", "استشفاء", "كارديو", "تمارين قوة", "راحة تامة"],
+        "nutrition": ["بروتين عالي", "بروتين عالي", "تحميل كارب", "فيتامينات", "كارب منخفض", "ألياف", "وجبة مفتوحة"],
+        "advice": ["شرب ماء", "إطالات", "نوم كافٍ", "مشي", "تركيز", "كثافة", "راحة"]
+    }
+}
+
+# 5. السايد بار (القلب + النبذة + الروابط)
 with st.sidebar:
-    if lottie_heart:
-        st_lottie(lottie_heart, height=160, key="heart")
-    else:
-        st.title("❤️ Health AI")
+    if lottie_heart: st_lottie(lottie_heart, height=150, key="heart")
+    lang = st.radio("🌐 Language / اللغة", ("English", "العربية"))
+    t = texts[lang]
     
     st.markdown("---")
-    st.subheader("🤖 Technical Brief")
-    st.markdown("""
-    <div class="about-box">
-    Built with a <b>Multi-Layer Perceptron (MLP)</b>, this AI predicts physical class based on biological metrics. 
-    It features custom <b>Feature Engineering</b> (BMI & Pulse Pressure) to enhance accuracy.
-    </div>
-    """, unsafe_allow_html=True)
-    
+    st.subheader(t["brief_h"])
+    st.markdown(f'<div class="about-box">{t["brief_txt"]}</div>', unsafe_allow_html=True)
     st.markdown("---")
-    st.subheader("👨‍💻 Developer")
+    st.subheader(t["dev_h"])
     st.markdown(f"**Ahmed Khaled Gamal**")
     st.markdown(f"""
-    <a href="https://www.linkedin.com/in/k-ahmed-auc/" class="linkedin-link" target="_blank">
-        <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="20"> LinkedIn
-    </a>
-    <br>
-    <a href="https://github.com/ahmedk-gamal" class="github-link" target="_blank">
-        <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" width="20"> GitHub
-    </a>
+        <a href="https://www.linkedin.com/in/k-ahmed-auc/" class="linkedin-link" target="_blank">LinkedIn</a><br>
+        <a href="https://github.com/ahmedk-gamal" class="github-link" target="_blank">GitHub</a>
     """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    lang = st.radio("🌐 Language", ("English", "العربية"))
 
-# 5. الواجهة الرئيسية واستمارة البيانات
-st.title("🧬 Health AI Analysis")
-if model is None:
-    st.error("Model files missing!"); st.stop()
+
+# (تابع للجزء الثاني..)
+
+# 6. الواجهة الرئيسية
+st.title(t["title"])
+if model is None: st.error("Model missing!"); st.stop()
 
 with st.form("main_form"):
     c1, c2 = st.columns(2)
     with c1:
-        age = st.number_input("Age", 10, 90, 25)
-        gender = st.selectbox("Gender", ["Male", "Female"])
-        height = st.number_input("Height (cm)", 120.0, 220.0, 175.0)
-        weight = st.number_input("Weight (kg)", 30.0, 200.0, 75.0)
-        fat = st.number_input("Fat %", 5.0, 50.0, 20.0)
+        age = st.number_input(t["labels"][0], 10, 90, 25)
+        gender = st.selectbox(t["labels"][1], ["Male", "Female"] if lang == "English" else ["ذكر", "أنثى"])
+        height = st.number_input(t["labels"][2], 120.0, 220.0, 175.0)
+        weight = st.number_input(t["labels"][3], 30.0, 200.0, 75.0)
+        fat = st.number_input(t["labels"][4], 5.0, 50.0, 20.0)
     with c2:
-        sys = st.number_input("Systolic BP", 80, 200, 120); dia = st.number_input("Diastolic BP", 50, 120, 80)
-        grip = st.number_input("Grip Force", 10.0, 100.0, 45.0); situps = st.number_input("Sit-ups", 0, 100, 35)
-        jump = st.number_input("Jump (cm)", 50.0, 350.0, 210.0); bend = st.number_input("Flexibility", -20.0, 50.0, 15.0)
-    submit = st.form_submit_button("Analyze & Generate Report ✨")
+        sys = st.number_input(t["labels"][5], 80, 200, 120); dia = st.number_input(t["labels"][6], 50, 120, 80)
+        grip = st.number_input(t["labels"][7], 10.0, 100.0, 45.0); situps = st.number_input(t["labels"][8], 0, 100, 35)
+        jump = st.number_input(t["labels"][9], 50.0, 350.0, 210.0); bend = st.number_input(t["labels"][10], -20.0, 50.0, 15.0)
+    submit = st.form_submit_button(t["btn"])
 
 if submit:
-    gender_val = 0 if gender == "Male" else 1
+    # منطق التوقع (Prediction Logic)
+    g_val = 0 if (gender == "Male" or gender == "ذكر") else 1
     bmi = weight / ((height/100)**2); pp = sys - dia
-    features = np.array([[age, gender_val, height, weight, fat, sys, dia, grip, situps, bend, jump, bmi, pp]])
+    features = np.array([[age, g_val, height, weight, fat, sys, dia, grip, situps, bend, jump, bmi, pp]])
     scaled = scaler.transform(features)
-    pred = model.predict(scaled); idx = np.argmax(pred)
-    classes = ['A (Excellent)', 'B (Good)', 'C (Fair)', 'D (Poor)']
+    idx = np.argmax(model.predict(scaled))
     
+    # النتائج
     st.markdown("---")
+    st.subheader(t["res_h"])
     r1, r2, r3 = st.columns(3)
-    r1.metric("Category", classes[idx]); r2.metric("BMI", f"{bmi:.2f}"); r3.metric("Pulse Pressure", pp)
-
-    df_plan = pd.DataFrame({
-        "Day": ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
-        "Workout": ["Push", "Pull", "Legs", "Recovery", "HIIT", "Power", "Rest"],
-        "Nutrition": ["Clean", "Clean", "Carb Load", "Vitamins", "Protein", "Protein", "Cheat"],
-        "Advice": ["Hydrate", "Stretch", "Sleep", "Active", "Intensity", "Focus", "Relax"]
-    })
-    st.table(df_plan)
+    r1.metric(t["cat"], t["classes"][idx]); r2.metric(t["bmi_lab"], f"{bmi:.2f}"); r3.metric("Pulse Pressure", pp)
     
-    pdf_bytes = create_pdf({"Age": age, "BMI": f"{bmi:.2f}", "Category": classes[idx]}, df_plan)
-    st.download_button("📥 Download PDF Report", data=pdf_bytes, file_name="Health_Report.pdf")
+    # الجدول المترجم
+    plan_df = pd.DataFrame({
+        "Day / اليوم": t["days"], "Workout / التمرين": t["workouts"],
+        "Nutrition / التغذية": t["nutrition"], "Advice / نصيحة": t["advice"]
+    })
+    st.table(plan_df)
+    
+    # التقرير
+    pdf_bytes = create_pdf(t, {t["labels"][0]: age, "BMI": f"{bmi:.2f}", t["cat"]: t["classes"][idx]}, plan_df)
+    st.download_button(t["pdf_btn"], data=pdf_bytes, file_name="Report.pdf")
 
-st.caption("© 2026 Ahmed Khaled Gamal | All Rights Reserved")
+st.caption("© 2026 Ahmed Khaled Gamal | Property & Tech Consultant")
