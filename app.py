@@ -4,98 +4,73 @@ import numpy as np
 import joblib
 from tensorflow.keras.models import load_model
 
-# 1. إعدادات الصفحة
-st.set_page_config(page_title="Body Performance AI", page_icon="🏋️‍♂️", layout="centered")
+# 1. إعدادات الصفحة الاحترافية
+st.set_page_config(
+    page_title="Body Performance AI",
+    page_icon="🧬",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# تحسين المظهر باستخدام CSS
+st.markdown("""
+    <style>
+    .main { background-color: #f5f7f9; }
+    .stButton>button { width: 100%; border-radius: 5px; height: 3em; background-color: #ff4b4b; color: white; }
+    .metric-card { background-color: white; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
+    </style>
+    """, unsafe_allow_html=True)
 
 # 2. تحميل الموديل والـ Scaler
 @st.cache_resource
 def load_assets():
-    # تأكد أن هذه الملفات موجودة في نفس الـ Repository على GitHub
     model = load_model('body_performance_model.keras')
     scaler = joblib.load('scaler.pkl')
     return model, scaler
 
-try:
-    model, scaler = load_assets()
-except Exception as e:
-    st.error(f"Error loading model/scaler: {e}")
+model, scaler = load_assets()
 
-# 3. دالة النصائح الذكية
-def get_health_advice(category, bmi, fat_pct):
-    st.markdown("---")
-    st.subheader("📋 تقرير النصائح المخصصة (Health Advisory)")
+# 3. Sidebar - معلومات المشروع (الـ Cards اللي طلبتها)
+with st.sidebar:
+    st.image("https://cdn-icons-png.flaticon.com/512/3843/3843205.png", width=100)
+    st.title("عن المشروع")
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.info(f"**تصنيف الأداء:** {category}")
-        if category == 'A':
-            st.success("أداء ممتاز! استمر في تمارين القوة والتحمل المتقدمة.")
-        elif category == 'B':
-            st.success("مستوى جيد جداً. ركز على تحسين مرونة الجسم.")
-        elif category == 'C':
-            st.warning("مستوى متوسط. تحتاج لزيادة عدد ساعات التمرين الأسبوعية.")
-        else:
-            st.error("مستوى ضعيف. ابدأ ببرنامج رياضي تدريجي تحت إشراف مختص.")
-
-    with col2:
-        st.info(f"**مؤشر كتلة الجسم (BMI):** {bmi:.2f}")
-        if bmi < 18.5:
-            st.warning("نحافة: يفضل زيادة السعرات الحرارية الصحية.")
-        elif 18.5 <= bmi < 25:
-            st.success("وزن مثالي: حافظ على نمط حياتك الحالي.")
-        else:
-            st.error("زيادة وزن: ركز على تمارين الكارديو وتقليل السكريات.")
-
-# 4. واجهة المستخدم (UI)
-st.title("🏋️‍♂️ نظام تقييم الأداء البدني الذكي")
-st.write("أدخل بياناتك بالأسفل للحصول على تحليل دقيق لمستواك الرياضي نصائح لتحسينه.")
-
-with st.form("input_form"):
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        age = st.number_input("العمر (Age)", min_value=1, max_value=100, value=25)
-        gender = st.selectbox("النوع (Gender)", options=["ذكر (Male)", "أنثى (Female)"])
-        height = st.number_input("الطول بالسنتيمتر (Height cm)", value=175.0)
-        weight = st.number_input("الوزن بالكيلوجرام (Weight kg)", value=75.0)
-        fat_pct = st.number_input("نسبة الدهون (Body Fat %)", value=20.0)
-        diastolic = st.number_input("الضغط الانبساطي (Diastolic BP)", value=80.0)
+    with st.container():
+        st.markdown("### 🤖 النموذج المستخدم")
+        st.info("""
+        **Multi-Layer Perceptron (MLP)**
+        شبكة عصبية عميقة مكونة من 3 طبقات خفية مع 512-256-128 نيوترون.
+        """)
         
-    with col2:
-        systolic = st.number_input("الضغط الانقباضي (Systolic BP)", value=120.0)
-        grip = st.number_input("قوة القبضة (Grip Force)", value=40.0)
-        sit_bend = st.number_input("اختبار الجلوس والتحريف (Sit & Bend)", value=15.0)
-        sit_ups = st.number_input("تمارين البطن (Sit-ups count)", value=35)
-        broad_jump = st.number_input("القفز الطويل (Broad Jump cm)", value=200.0)
+    with st.container():
+        st.markdown("### 📊 نبذة عن الموديل")
+        st.write("""
+        تم تدريب الموديل على أكثر من 13 ألف سجل حيوى. يستخدم الـ **Feature Engineering** لحساب الـ BMI و Pulse Pressure لزيادة دقة التصنيف.
+        """)
+    
+    st.markdown("---")
+    st.markdown("### 👨‍💻 المطور")
+    st.success("**Ahmed Khaled Gamal**")
 
-    submit = st.form_submit_button("تحليل الأداء البدني 🚀")
+# 4. الواجهة الرئيسية
+st.title("🧬 نظام تحليل الأداء البدني الذكي")
+st.markdown("قم بإدخال بياناتك الحيوية والرياضية للحصول على تصنيف دقيق لمستواك.")
 
-# 5. معالجة البيانات والتوقع
-if submit:
-    # تحويل النوع لرقم (0 للأنثى، 1 للذكر)
-    gender_val = 1 if "ذكر" in gender else 0
+# تقسيم المدخلات في فورم منظم
+with st.form("main_form"):
+    t1, t2 = st.columns(2)
     
-    # Feature Engineering (نفس اللي عملناه في التدريب)
-    bmi = weight / ((height / 100) ** 2)
-    pulse_pressure = systolic - diastolic
-    
-    # تجهيز الداتا للـ Scaler
-    input_data = [age, gender_val, height, weight, fat_pct, diastolic, systolic, grip, sit_bend, sit_ups, broad_jump, bmi, pulse_pressure]
-    
-    # تحويل لـ DataFrame بنفس أسماء الأعمدة الأصلية
-    columns = scaler.feature_names_in_
-    input_df = pd.DataFrame([input_data], columns=columns)
-    
-    # الـ Scaling
-    input_scaled = scaler.transform(input_df)
-    
-    # التوقع
-    prediction_prob = model.predict(input_scaled)
-    class_idx = np.argmax(prediction_prob)
-    categories = ['A', 'B', 'C', 'D']
-    result_class = categories[class_idx]
-    
-    # عرض النتيجة والنصيحة
-    st.balloons()
-    get_health_advice(result_class, bmi, fat_pct)
+    with t1:
+        st.subheader("📋 البيانات الأساسية")
+        age = st.number_input("العمر", 10, 90, 25)
+        gender = st.selectbox("النوع", ["ذكر", "أنثى"])
+        height = st.number_input("الطول (سم)", 120.0, 220.0, 175.0)
+        weight = st.number_input("الوزن (كجم)", 30.0, 200.0, 75.0)
+        fat = st.number_input("نسبة دهون الجسم (%)", 5.0, 50.0, 20.0)
+
+    with t2:
+        st.subheader("💪 الاختبارات الرياضية")
+        sys = st.number_input("الضغط الانقباضي", 80, 200, 120)
+        dia = st.number_input("الضغط الانبساطي", 50, 120, 80)
+        grip = st.number_input("قوة القبضة", 10.0, 100.0, 45.0)
+        sit_ups = st.number_input("عدد تمارين البطن", 0
