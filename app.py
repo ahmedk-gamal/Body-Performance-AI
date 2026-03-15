@@ -5,7 +5,7 @@ import joblib
 from tensorflow.keras.models import load_model
 from streamlit_lottie import st_lottie
 import requests
-from fpdf import FPDF # للتقرير
+from fpdf import FPDF 
 import base64
 
 # 1. إعدادات الصفحة بنمط Apple Health
@@ -25,16 +25,24 @@ st.markdown("""
         width: 100%; border-radius: 12px; height: 3.5em; 
         background-color: #ff2d55; color: white; font-weight: 600; 
         font-size: 18px; border: none; transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(255, 45, 85, 0.2);
     }
-    .stButton>button:hover { background-color: #e6264d; transform: translateY(-2px); }
-    .social-links a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; padding: 5px; }
+    .stButton>button:hover { 
+        background-color: #e6264d; 
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 45, 85, 0.3);
+    }
+    .social-links a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; padding: 5px; transition: 0.3s; }
+    .social-links a:hover { color: #ff2d55; }
     th { background-color: #ff2d55 !important; color: white !important; text-align: center !important; }
     td { text-align: center !important; }
     [data-testid="stMetricValue"] { color: #ff2d55; font-weight: 800; }
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# 2. دالة توليد تقرير PDF (English Only to avoid font issues)
+# 2. دالة توليد تقرير PDF (تصحيح الـ Bytes)
 def create_pdf(t, data_summary, plan_df):
     pdf = FPDF()
     pdf.add_page()
@@ -70,7 +78,7 @@ def create_pdf(t, data_summary, plan_df):
         pdf.cell(55, 10, str(row[3]), 1)
         pdf.ln()
         
-    return pdf.output(dest='S').encode('latin-1')
+    return bytes(pdf.output()) # التعديل الصحيح لـ fpdf2
 
 # 3. تحميل الأصول (القلب والموديل)
 def load_lottieurl(url):
@@ -100,7 +108,7 @@ texts = {
         "title": "🧬 Health AI Analysis",
         "sub": "Predictive Health System inspired by Apple Health.",
         "about_h": "🤖 Technology Stack",
-        "model_desc": "**Deep Learning (MLP)**\nFully connected neural network for health classification.",
+        "model_desc": "**Deep Learning (MLP)**\n3 Hidden Layers (512-256-128 neurons).",
         "dev_h": "👨‍💻 Developer",
         "btn": "Analyze & Generate Report ✨",
         "pdf_btn": "📥 Download Health Report (PDF)",
@@ -111,7 +119,7 @@ texts = {
         "title": "🧬 تحليل المؤشرات الصحية الذكي",
         "sub": "نظام تنبؤ صحي متطور بتصميم Apple Health.",
         "about_h": "🤖 التقنيات المستخدمة",
-        "model_desc": "**التعلم العميق (MLP)**\nشبكة عصبية متطورة لتصنيف الحالة البدنية بدقة.",
+        "model_desc": "**التعلم العميق (MLP)**\nشبكة عصبية بـ 3 طبقات خفية (512-256-128 نيوترون).",
         "dev_h": "👨‍💻 المطور",
         "btn": "تحليل واستخراج التقرير ✨",
         "pdf_btn": "📥 تحميل التقرير الطبي (PDF)",
@@ -121,7 +129,6 @@ texts = {
 }
 t = texts[lang]
 
-# 5. عرض السايد بار
 with st.sidebar:
     st.subheader(t["about_h"])
     st.info(t["model_desc"])
@@ -135,7 +142,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# 6. الواجهة الرئيسية والمدخلات
+# 5. الواجهة الرئيسية
 st.title(t["title"])
 st.markdown(t["sub"])
 
@@ -157,11 +164,9 @@ with st.form("health_form"):
         grip = st.number_input("Grip Force", 10.0, 100.0, 45.0)
         situps = st.number_input("Sit-ups Count", 0, 100, 35)
         jump = st.number_input("Broad Jump (cm)", 50.0, 350.0, 210.0)
-        bend = st.number_input("Flexibility (Sit & Bend)", -20.0, 50.0, 15.0)
-    
+        bend = st.number_input("Flexibility", -20.0, 50.0, 15.0)
     submit = st.form_submit_button(t["btn"])
 
-# 7. التوقع والنتائج
 if submit:
     gender_val = 0 if gender == "Male" else 1
     bmi = weight / ((height / 100) ** 2)
@@ -177,7 +182,6 @@ if submit:
     r2.metric("BMI", f"{bmi:.2f}")
     r3.metric("Pulse Pressure", pp)
 
-    # جداول الخطة (English content for PDF compatibility)
     workouts = {0:["Push Day","Pull Day","Legs","Recovery","HIIT","Power","Rest"],
                 1:["Chest/Tri","Back/Bi","Rest","Lower Body","Shoulders","Cardio","Rest"],
                 2:["Power Walk","Rest","Bodyweight","Power Walk","Rest","Circuit","Active"],
@@ -188,10 +192,9 @@ if submit:
     df_plan = pd.DataFrame({"Day": ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"], "Workout": workouts[idx], "Nutrition": nut, "Advice": tips})
     st.table(df_plan)
     
-    # توليد وتحميل الـ PDF
     report_data = {"Age": age, "Gender": gender, "BMI": f"{bmi:.2f}", "Fitness Class": t["classes"][idx]}
     pdf_bytes = create_pdf(t, report_data, df_plan)
     
-    st.download_button(label=t["pdf_btn"], data=pdf_bytes, file_name=f"Health_Report_{age}.pdf", mime="application/pdf")
+    st.download_button(label=t["pdf_btn"], data=pdf_bytes, file_name=f"Health_Report.pdf", mime="application/pdf")
 
 st.caption("© 2026 Ahmed Khaled Gamal | All Rights Reserved")
