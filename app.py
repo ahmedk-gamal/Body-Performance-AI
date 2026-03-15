@@ -79,3 +79,44 @@ with st.form("main_form"):
         bend = st.number_input("مرونة الظهر (Sit & Bend)", -20.0, 50.0, 15.0)
 
     submit = st.form_submit_button("تحليل البيانات الآن ✨")
+
+
+
+if submit:
+    # 1. تحويل النوع لقيمة رقمية (زي ما الموديل متدرب)
+    gender_val = 0 if gender == "ذكر" else 1
+    
+    # 2. حساب الـ Feature Engineering (اللي أنت كاتبه في السايد بار)
+    bmi = weight / ((height / 100) ** 2)
+    pulse_pressure = sys - dia
+    
+    # 3. تجهيز البيانات في مصفوفة (تأكد من ترتيب الأعمدة كما في التدريب)
+    # الترتيب ده افتراضي، رتبه حسب الـ Features اللي الموديل متعود عليها
+    features = np.array([[age, gender_val, height, weight, fat, sys, dia, grip, sit_ups, bend, jump, bmi, pulse_pressure]])
+    
+    # 4. عمل Scaling للبيانات
+    scaled_features = scaler.transform(features)
+    
+    # 5. التوقع (Prediction)
+    prediction = model.predict(scaled_features)
+    class_idx = np.argmax(prediction)
+    
+    # 6. تحويل النتيجة لكلام مفهوم (A, B, C, D)
+    classes = ['A (ممتاز)', 'B (جيد جداً)', 'C (جيد)', 'D (ضعيف)']
+    result = classes[class_idx]
+    
+    # 7. عرض النتيجة بشكل شيك
+    st.markdown("---")
+    st.header("📊 النتيجة النهائية")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric(label="التصنيف البدني", value=result)
+    with col2:
+        st.metric(label="مؤشر كتلة الجسم (BMI)", value=f"{bmi:.2f}")
+        
+    if class_idx == 0:
+        st.balloons()
+        st.success("أداء استثنائي! استمر في المحافظة على مستواك.")
+    elif class_idx == 3:
+        st.warning("مستواك البدني محتاج تطوير، ابدأ ببرنامج رياضي تدريجي.")
