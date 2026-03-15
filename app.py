@@ -120,3 +120,48 @@ if submit:
         st.success("أداء استثنائي! استمر في المحافظة على مستواك.")
     elif class_idx == 3:
         st.warning("مستواك البدني محتاج تطوير، ابدأ ببرنامج رياضي تدريجي.")
+
+
+
+
+# (بعد عرض النتيجة مباشرة)
+    st.markdown("---")
+    st.subheader("💡 نصائح الخبراء المخصصة لك")
+    
+    # مصفوفة النصائح بناءً على الفئة
+    recommendations = {
+        0: { # فئة A
+            "title": "أنت في القمة! كيف تحافظ عليها؟",
+            "tips": ["ركز على تمارين الـ Hypertrophy لزيادة الكتلة العضلية.", "جرب تمارين الـ HIIT لرفع كفاءة القلب.", "اهتم بفترات الاستشفاء (Recovery) والنوم العميق."],
+            "article": "https://www.healthline.com/health/fitness-exercise/staying-fit",
+            "color": "green"
+        },
+        1: { # فئة B
+            "title": "أداء رائع.. خطوات بسيطة للوصول للمثالية",
+            "tips": ["زود شدة التمارين (Intensity) بنسبة 10% أسبوعياً.", "ركز على مرونة الظهر وتمارين الإطالة.", "تأكد من تناول كمية كافية من البروتين (1.6 جم لكل كيلو)."],
+            "article": "https://www.verywellfit.com/moving-from-intermediate-to-advanced-workout-1231225",
+            "color": "blue"
+        },
+        2: { # فئة C
+            "title": "بداية جيدة.. نحتاج لزيادة الالتزام",
+            "tips": ["التزم بـ 3 أيام تدريب أسبوعياً كحد أدنى.", "حسن عاداتك الغذائية وقلل السكريات.", "ركز على الكارديو (المشي السريع أو الجري) لمدة 30 دقيقة."],
+            "article": "https://www.nerdfitness.com/blog/how-to-build-your-own-workout-routine/",
+            "color": "orange"
+        },
+        3: { # فئة D
+            "title": "خطة الإنقاذ البدني.. ابدأ الآن!",
+            "tips": ["ابدأ بتمارين وزن الجسم (ضغط، سكوات) في المنزل.", "المشي لمدة 20 دقيقة يومياً سيحدث فرقاً شاسعاً.", "استشر طبيب تغذية لتقليل نسبة الدهون بأمان."],
+            "article": "https://www.healthline.com/health/fitness-exercise/how-to-start-working-out",
+            "color": "red"
+        }
+    }
+
+    user_rec = recommendations[class_idx]
+    
+    # عرض النصائح في Container ملون
+    with st.container():
+        st.markdown(f"#### {user_rec['title']}")
+        for tip in user_rec['tips']:
+            st.write(f"- {tip}")
+        
+        st.markdown(f"[🔗 اقرأ مقالاً تفصيلياً لنظامك المثالي من هنا]({user_rec['article']})")
