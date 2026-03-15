@@ -7,3 +7,6 @@ streamlit-lottie
 requests
 fpdf
 fpdf2
+reportlab
+qrcode[pil]
+Pillow
