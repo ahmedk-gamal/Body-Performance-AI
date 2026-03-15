@@ -3,196 +3,199 @@ import pandas as pd
 import numpy as np
 import joblib
 from tensorflow.keras.models import load_model
-from streamlit_lottie import st_lottie # مكتبة الانيميشن الجديدة
-import requests # عشان نجيب الانيميشن من النت
+from streamlit_lottie import st_lottie
+import requests
 
-# 1. إعدادات الصفحة الاحترافية
+# 1. إعدادات الصفحة بنمط Apple
 st.set_page_config(
-    page_title="Body Performance AI",
-    page_icon="🧬",
+    page_title="Health AI | الأداء البدني",
+    page_icon="❤️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 🎨 تحسين الـ CSS ليدعم الـ Dark & Light Mode وألوان متناسقة
+# 🎨 Apple Health Style CSS
 st.markdown("""
     <style>
-    /* تغيير لون الزرار وتأثيره عند الوقوف عليه */
+    /* ألوان Apple Health */
+    :root {
+        --apple-red: #ff2d55;
+        --apple-bg: #f2f2f7;
+    }
+    
+    .main { background-color: var(--apple-bg); }
+    
+    /* تصميم الأزرار */
     .stButton>button { 
-        width: 100%; border-radius: 8px; height: 3.5em; 
-        background-color: #ff4b4b; color: white; font-weight: bold; 
+        width: 100%; border-radius: 12px; height: 3.5em; 
+        background-color: #ff2d55; color: white; font-weight: 600; 
         font-size: 18px; border: none; transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(255, 45, 85, 0.2);
     }
     .stButton>button:hover {
-        background-color: #ff3333;
-        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4);
+        background-color: #e6264d;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 45, 85, 0.3);
     }
+
+    /* تحسين شكل الجداول والكروت */
+    div[data-testid="stMetricValue"] { color: #ff2d55; font-weight: 700; }
+    .stTable { border-radius: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    th { background-color: #ff2d55 !important; color: white !important; }
     
-    /* تنسيق الجداول لتكون احترافية */
-    th { text-align: center !important; }
-    td { text-align: center !important; }
-    
-    /* تنسيق الـ Metric Cards */
-    [data-testid="stMetricValue"] {
-        font-size: 32px;
-        font-weight: bold;
-    }
+    /* إخفاء القوائم غير الضرورية لشكل أنظف */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# 2. دالة لتحميل انيميشن Lottie (القلب النابض)
+# 2. تحميل انيميشن القلب (Apple Health Style)
 def load_lottieurl(url):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
+    try:
+        r = requests.get(url)
+        return r.json() if r.status_code == 200 else None
+    except: return None
 
-# رابط انيميشن قلب بينبض (ممكن تغيره برابط JSON تاني لو حبيت)
-lottie_heart = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_9czw5u1f.json")
+# رابط قلب نابض أنيق
+lottie_heart = load_lottieurl("https://lottie.host/82334807-6c2e-4054-8e36-7c0a6b72a6b2/v8Y8yO5x20.json")
 
-# 3. نظام الترجمة والنبذة التقنية (كما في النسخة السابقة)
+# 3. نظام الترجمة والنبذة
 with st.sidebar:
-    # عرض القلب النابض بدل الصورة الثابتة
     if lottie_heart:
-        st_lottie(lottie_heart, height=120, key="heart")
+        st_lottie(lottie_heart, height=150, key="apple_heart")
     else:
-        st.write("❤️") # fallback في حالة فشل التحميل
-
-    lang = st.radio("🌐 Language / اللغة", ("English", "العربية"))
+        st.title("❤️ Health")
+    
+    lang = st.radio("🌐 Select Language", ("English", "العربية"))
     st.markdown("---")
 
 texts = {
     "English": {
-        "title": "🧬 AI Body Performance System",
-        "sub": "Predict your fitness class and get a custom plan.",
-        "about_h": "🤖 About the Model",
-        "model_desc": "**Multi-Layer Perceptron (MLP)**\nA deep neural network with 3 hidden layers (512-256-128 neurons).",
-        "model_stats": "**Model Accuracy:** 82.19%\n**Dataset:** 13,000+ biological records.",
+        "title": "🧬 Physical Health Analysis",
+        "sub": "AI-powered performance tracking inspired by Apple Health.",
+        "about_h": "🤖 Technology",
+        "model_desc": "**MLP Neural Network**\nAdvanced predictive model for health classification.",
+        "model_stats": "**Accuracy:** 82.19%\n**Dataset:** 13K+ records",
         "dev": "👨‍💻 Developer",
-        "basic_h": "📋 Vital Data",
+        "basic_h": "📋 Vital Signs",
         "age": "Age", "gender": "Gender", "male": "Male", "female": "Female",
-        "height": "Height (cm)", "weight": "Weight (kg)", "fat": "Body Fat %",
-        "test_h": "💪 Performance Tests",
-        "sys": "Systolic", "dia": "Diastolic", "grip": "Grip Force",
+        "height": "Height (cm)", "weight": "Weight (kg)", "fat": "Fat %",
+        "test_h": "💪 Activity Tests",
+        "sys": "Systolic BP", "dia": "Diastolic BP", "grip": "Grip Force",
         "situps": "Sit-ups", "jump": "Jump (cm)", "bend": "Flexibility",
-        "btn": "Analyze Now ✨",
-        "res_h": "📊 Results",
-        "class": "Classification", "bmi": "BMI Index", "pp": "Pulse Pressure",
-        "plan_h": "🗓️ Your Weekly Plan",
-        "col_day": "Day", "col_exe": "Workout", "col_nut": "Veggies/Fruit", "col_tip": "Tip",
+        "btn": "Calculate My Health ✨",
+        "res_h": "📊 Health Summary",
+        "class": "Fitness Category", "bmi": "BMI", "pp": "Pulse Pressure",
+        "plan_h": "🗓️ Personalized Action Plan",
+        "col_day": "Day", "col_exe": "Activity", "col_nut": "Nutrition", "col_tip": "Advice",
         "days": ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
         "classes": ['A (Excellent)', 'B (Good)', 'C (Fair)', 'D (Poor)']
     },
     "العربية": {
-        "title": "🧬 نظام تحليل الأداء البدني الذكي",
-        "sub": "توقع فئتك البدنية واحصل على خطتك التدريبية المخصصة.",
-        "about_h": "🤖 عن النموذج المستخدم",
-        "model_desc": "**Perceptron متعدد الطبقات (MLP)**\nشبكة عصبية عميقة مكونة من 3 طبقات خفية (512-256-128 نيوترون).",
-        "model_stats": "**دقة النموذج:** 82.19%\n**البيانات:** أكثر من 13 ألف سجل حيوي.",
+        "title": "🧬 تحليل المؤشرات الصحية",
+        "sub": "تحليل ذكي للأداء البدني مستوحى من Apple Health.",
+        "about_h": "🤖 التقنية المستخدمة",
+        "model_desc": "**الشبكة العصبية MLP**\nنموذج متطور للتنبؤ وتصنيف الحالة البدنية.",
+        "model_stats": "**دقة النموذج:** 82.19%\n**البيانات:** 13 ألف+ سجل",
         "dev": "👨‍💻 المطور",
-        "basic_h": "📋 البيانات الحيوية",
+        "basic_h": "📋 المؤشرات الحيوية",
         "age": "العمر", "gender": "النوع", "male": "ذكر", "female": "أنثى",
         "height": "الطول (سم)", "weight": "الوزن (كجم)", "fat": "نسبة الدهون %",
-        "test_h": "💪 اختبارات الأداء",
+        "test_h": "💪 اختبارات النشاط",
         "sys": "الضغط الانقباضي", "dia": "الضغط الانبساطي", "grip": "قوة القبضة",
         "situps": "تمارين البطن", "jump": "القفز (سم)", "bend": "المرونة",
-        "btn": "حلل الآن ✨",
-        "res_h": "📊 النتائج",
-        "class": "التصنيف البدني", "bmi": "مؤشر الكتلة", "pp": "فرق الضغط",
-        "plan_h": "🗓️ خطتك الأسبوعية المتكاملة",
-        "col_day": "اليوم", "col_exe": "التمرين", "col_nut": "الخضار/الفاكهة", "col_tip": "نصيحة",
+        "btn": "احسب مؤشراتي الآن ✨",
+        "res_h": "📊 ملخص الحالة",
+        "class": "الفئة البدنية", "bmi": "كتلة الجسم", "pp": "فرق الضغط",
+        "plan_h": "🗓️ خطة العمل المقترحة",
+        "col_day": "اليوم", "col_exe": "النشاط", "col_nut": "التغذية", "col_tip": "نصيحة",
         "days": ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
         "classes": ['A (ممتاز)', 'B (جيد جداً)', 'C (جيد)', 'D (ضعيف)']
     }
 }
 t = texts[lang]
 
-# عرض النبذة التقنية والمطور في السايد بار بناءً على اللغة
 with st.sidebar:
     st.subheader(t["about_h"])
     st.info(t["model_desc"])
-    st.write(t["model_stats"])
+    st.caption(t["model_stats"])
     st.markdown("---")
     st.subheader(t["dev"])
-    st.success("**Ahmed Khaled Gamal**")
+    st.success(f"**Ahmed Khaled Gamal**")
 
-# 4. تحميل الموديل والـ Scaler (مع معالجة الأخطاء)
+# 4. تحميل الأصول التقنية
 @st.cache_resource
 def load_assets():
     try:
-        model = load_model('body_performance_model.keras')
-        scaler = joblib.load('scaler.pkl')
-        return model, scaler
-    except Exception as e:
-        return None, None
+        m = load_model('body_performance_model.keras')
+        s = joblib.load('scaler.pkl')
+        return m, s
+    except: return None, None
 
 model, scaler = load_assets()
 
 if model is None:
-    st.error("Error: Could not load model or scaler files. Ensure 'body_performance_model.keras' and 'scaler.pkl' are in the same directory.")
+    st.error("Missing Model Files! Please ensure 'body_performance_model.keras' and 'scaler.pkl' are uploaded.")
     st.stop()
 
-# 5. الواجهة الرئيسية والمدخلات
+# 5. التصميم الرئيسي
 st.title(t["title"])
 st.markdown(t["sub"])
 
-with st.form("main_form"):
-    t1, t2 = st.columns(2)
-    with t1:
+with st.form("apple_form"):
+    c1, c2 = st.columns(2)
+    with c1:
         st.subheader(t["basic_h"])
         age = st.number_input(t["age"], 10, 90, 25)
         gender = st.selectbox(t["gender"], [t["male"], t["female"]])
         height = st.number_input(t["height"], 120.0, 220.0, 175.0)
         weight = st.number_input(t["weight"], 30.0, 200.0, 75.0)
         fat = st.number_input(t["fat"], 5.0, 50.0, 20.0)
-    with t2:
+    with c2:
         st.subheader(t["test_h"])
         sys = st.number_input(t["sys"], 80, 200, 120)
         dia = st.number_input(t["dia"], 50, 120, 80)
         grip = st.number_input(t["grip"], 10.0, 100.0, 45.0)
-        sit_ups = st.number_input(t["situps"], 0, 100, 35)
+        situps = st.number_input(t["situps"], 0, 100, 35)
         jump = st.number_input(t["jump"], 50.0, 350.0, 210.0)
         bend = st.number_input(t["bend"], -20.0, 50.0, 15.0)
+    
     submit = st.form_submit_button(t["btn"])
 
 # 6. المعالجة وعرض النتائج
 if submit:
-    # Feature Engineering
     gender_val = 0 if gender == t["male"] else 1
     bmi = weight / ((height / 100) ** 2)
-    pulse_pressure = sys - dia
+    pp = sys - dia
     
-    # تحضير البيانات للتوقع
-    features = np.array([[age, gender_val, height, weight, fat, sys, dia, grip, sit_ups, bend, jump, bmi, pulse_pressure]])
-    scaled_features = scaler.transform(features)
-    
-    # التوقع
-    prediction = model.predict(scaled_features)
-    class_idx = np.argmax(prediction)
+    features = np.array([[age, gender_val, height, weight, fat, sys, dia, grip, situps, bend, jump, bmi, pp]])
+    scaled = scaler.transform(features)
+    pred = model.predict(scaled)
+    idx = np.argmax(pred)
     
     st.markdown("---")
     st.header(t["res_h"])
-    c_res = st.columns(3)
-    c_res[0].metric(t["class"], t["classes"][class_idx])
-    c_res[1].metric(t["bmi"], f"{bmi:.2f}")
-    c_res[2].metric(t["pp"], pulse_pressure)
+    r1, r2, r3 = st.columns(3)
+    r1.metric(t["class"], t["classes"][idx])
+    r2.metric(t["bmi"], f"{bmi:.2f}")
+    r3.metric(t["pp"], pp)
 
-    # بيانات الجدول بناءً على الفئة واللغة
+    # جداول الخطة (كما في النسخ السابقة مع تحسين المحتوى)
     if lang == "English":
-        plans = {0:["Push Day","Pull Day","Legs","Active Rest","HIIT","Full Body","Rest"],
-                 1:["Chest/Tri","Back/Bi","Rest","Legs","Shoulders","Cardio","Rest"],
-                 2:["Fast Walk","Rest","Bodyweight","Fast Walk","Rest","Full Body","Active"],
-                 3:["Light Walk","Stretch","Rest","Light Walk","Easy Cardio","Light Walk","Rest"]}
-        nut = ["Banana/Berries","Apple/Broccoli","Avocado","Kiwi","Orange","Pomegranate","Seasonal"]
-        tips = ["High Carb","High Protein","Hydrate","Vitamins","Antioxidants","Recovery","Cheat Day"]
+        workouts = {0:["Push (Chest/Shoulders)","Pull (Back/Biceps)","Legs (Quads/Glutes)","Active Recovery","HIIT Session","Full Body Power","Full Rest"],
+                    1:["Chest/Triceps","Back/Biceps","Full Rest","Lower Body","Shoulders/Abs","Cardio (40 min)","Rest"],
+                    2:["Power Walking","Rest","Bodyweight Skills","Power Walking","Rest","Full Body Circuit","Active Day"],
+                    3:["Light Walk (20 min)","Static Stretching","Rest","Light Walk","Gentle Yoga","Light Walk","Rest"]}
+        foods = ["Berries & Spinach","Apples & Broccoli","Avocado & Beets","Kiwi & Cucumber","Citrus & Carrots","Pomegranate","Seasonal Mix"]
+        tips = ["High Carb (Pre)","Lean Protein","Hydration (3L)","Complex Carbs","Antioxidants","Muscle Repair","Relax"]
     else:
-        plans = {0:["دفع (صدر/أكتاف)","سحب (ظهر/باي)","أرجل","راحة إيجابية","HIIT","فول بادي","راحة"],
-                 1:["صدر + تراي","ظهر + باي","راحة","أرجل","أكتاف","جري 40د","راحة"],
-                 2:["مشي سريع","راحة","وزن جسم","مشي سريع","راحة","تمارين شاملة","نشاط حر"],
-                 3:["مشي خفيف","إطالة","راحة","مشي خفيف","تقوية بسيطة","مشي خفيف","راحة"]}
-        nut = ["موز وتوت","تفاح وبروكلي","أفوكادو","كيوي","برتقال","رمان","فاكهة موسمية"]
-        tips = ["كارب عالي","بروتين مكثف","ترطيب","فيتامينات","مضادات أكسدة","استشفاء","يوم مفتوح"]
+        workouts = {0:["دفع (صدر وأكتاف)","سحب (ظهر وباي)","أرجل (عضلات أمامية)","استشفاء نشط","تمرين HIIT","قوة شاملة","راحة تامة"],
+                    1:["صدر وتراي","ظهر وباي","راحة","أرجل كاملة","أكتاف وبطن","كارديو (40 د)","راحة"],
+                    2:["مشي سريع","راحة","تمارين وزن الجسم","مشي سريع","راحة","دائرة تدريبية","يوم نشط"],
+                    3:["مشي خفيف (20 د)","إطالات ثابتة","راحة","مشي خفيف","يوجا بسيطة","مشي خفيف","راحة"]}
+        foods = ["توت وسبانخ","تفاح وبروكلي","أفوكادو وبنجر","كيوي وخيار","حمضيات وجزر","رمان","فاكهة الموسم"]
+        tips = ["كارب عالي","بروتين صافي","ترطيب (3 لتر)","كارب معقد","مضادات أكسدة","ترميم العضلات","استرخاء"]
 
-    df_data = {t["col_day"]: t["days"], t["col_exe"]: plans[class_idx], t["col_nut"]: nut, t["col_tip"]: tips}
+    df = pd.DataFrame({t["col_day"]: t["days"], t["col_exe"]: workouts[idx], t["col_nut"]: foods, t["col_tip"]: tips})
     st.markdown(f"### {t['plan_h']}")
-    st.table(pd.DataFrame(df_data))
+    st.table(df)
