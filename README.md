@@ -38,6 +38,8 @@
 - الحصول على تصنيف فوري للأداء البدني.
 - عرض نصائح ديناميكية تعتمد على حالة المستخدم الصحية (نسبة الدهون والـ BMI).
 
+https://body-performance-ai-e2avrvegv2mcxnso7bbsvu.streamlit.app/
+
 ---
 
 ## 🚀 كيفية التشغيل (Quick Start)
