@@ -78,10 +78,13 @@ streamlit run app.py
 
 [ ] تطوير لوحة تحكم (Dashboard) لمتابعة التطور الزمني لأداء المستخدم.
 
-##👨‍💼 صاحب المشروع (Author)
+
+
+## 👨‍💼  (Author)
 Ahmed Khaled Gamal Hossam Eldien
 
-##⭐️ إذا أعجبك هذا العمل، لا تنسَ دعم المشروع بـ Star على GitHub!
+
+## ⭐️  إذا أعجبك هذا العمل، لا تنسَ دعم المشروع بـ Star على GitHub!
 
 
 
