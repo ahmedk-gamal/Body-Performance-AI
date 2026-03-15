@@ -32,7 +32,6 @@ st.markdown("""
     
     html, body, [class*="css"] { font-family: 'Cairo', sans-serif; }
     
-    /* تنسيق اللوجو في منتصف الصفحة */
     .main-header-container {
         display: flex;
         flex-direction: column;
@@ -50,7 +49,6 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* تنسيق الهيدر في السايد بار */
     .sidebar-header {
         display: flex;
         flex-direction: column;
@@ -66,7 +64,6 @@ st.markdown("""
         text-align: center;
     }
 
-    /* أزرار أبل */
     .stButton>button { 
         width: 100%; border-radius: 12px; height: 3.8em; 
         background-color: var(--apple-red); color: white; font-weight: 700; 
@@ -76,51 +73,59 @@ st.markdown("""
         background-color: #e6264d; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
 
-    /* صندوق النبذة التقنية الملون */
     .about-box {
         background-color: var(--soft-blue); padding: 20px; border-radius: 15px;
         border-left: 6px solid #2196F3; font-size: 14px; color: var(--deep-blue); 
         margin-bottom: 25px; line-height: 1.6;
     }
 
-    /* أيقونات التواصل الاجتماعي */
     .social-link {
         display: flex; align-items: center; gap: 12px;
         text-decoration: none; font-weight: 700; margin-bottom: 15px; transition: 0.3s;
     }
     .linkedin { color: #0077b5 !important; }
     .github { color: #333 !important; }
-    .social-link:hover { transform: translateX(5px); opacity: 0.8; }
     
-    /* تنسيق الجداول والنتائج */
     th { background-color: var(--apple-red) !important; color: white !important; text-align: center !important; }
     [data-testid="stMetricValue"] { color: var(--apple-red); font-weight: 800; }
     </style>
     """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. الدوال المساعدة (PDF & Assets)
+# 3. الدوال المساعدة (تم تعديل دالة الـ PDF هنا)
 # ==========================================
-def create_pdf(t, summary, plan):
+def create_pdf(summary):
     pdf = FPDF()
     pdf.add_page()
+    
+    # تصميم الخلفية الجانبية
     pdf.set_fill_color(255, 45, 85)
     pdf.rect(0, 0, 65, 300, 'F')
     
+    # نصوص الهوية (بالإنجليزي لتجنب مشاكل الخطوط)
     pdf.set_font("Arial", 'B', 16); pdf.set_text_color(255, 255, 255)
     pdf.text(10, 30, "HEALTH AI")
     pdf.set_font("Arial", '', 10); pdf.text(10, 50, "DEVELOPER:")
     pdf.set_font("Arial", 'B', 10); pdf.text(10, 56, "Ahmed Khaled Gamal")
     
+    # عنوان التقرير
     pdf.set_xy(75, 30); pdf.set_text_color(0, 0, 0); pdf.set_font("Arial", 'B', 22)
     pdf.cell(130, 10, "OFFICIAL HEALTH REPORT", ln=True)
     pdf.ln(15)
     
+    # كتابة النتائج مع حماية من الـ Unicode Errors
     pdf.set_font("Arial", 'B', 12)
     for k, v in summary.items():
-        pdf.set_x(75); pdf.cell(50, 10, f"{k}:", 0)
-        pdf.set_font("Arial", '', 12); pdf.cell(80, 10, f"{v}", ln=True)
+        # تنظيف النص من أي حروف غير مدعومة (مثل العربي)
+        safe_k = str(k).encode('latin-1', 'ignore').decode('latin-1')
+        safe_v = str(v).encode('latin-1', 'ignore').decode('latin-1')
+        
+        pdf.set_x(75)
+        pdf.cell(50, 10, f"{safe_k}:", 0)
+        pdf.set_font("Arial", '', 12)
+        pdf.cell(80, 10, f"{safe_v}", ln=True)
         pdf.set_font("Arial", 'B', 12)
+        
     return bytes(pdf.output())
 
 def load_lottie(url):
@@ -135,18 +140,17 @@ def load_ai_models():
         return m, s
     except: return None, None
 
-# تحميل الموديل والأنيميشن
 heart_anim = load_lottie("https://assets5.lottiefiles.com/packages/lf20_m6cu96.json")
 model, scaler = load_ai_models()
 
 # ==========================================
-# 4. قاموس اللغات الاحترافي
+# 4. قاموس اللغات
 # ==========================================
 texts = {
     "English": {
         "title": "Health AI Dashboard",
         "brief_h": "🤖 Technical Brief",
-        "brief_txt": "This system utilizes a <b>Deep Learning MLP</b> model to classify physical performance. It features custom <b>Feature Engineering</b> (BMI & Pulse Pressure) to enhance accuracy.",
+        "brief_txt": "This system utilizes a <b>Deep Learning MLP</b> model to classify physical performance. It features custom <b>Feature Engineering</b> (BMI & Pulse Pressure).",
         "dev_h": "👨‍💻 Developer Information",
         "btn": "Analyze & Generate Report ✨",
         "pdf_btn": "📥 Download PDF Report",
@@ -164,7 +168,7 @@ texts = {
     "العربية": {
         "title": "لوحة تحكم الأداء البدني الذكية",
         "brief_h": "🤖 نبذة تقنية",
-        "brief_txt": "يعتمد النظام على نموذج <b>التعلم العميق (MLP)</b> للتنبؤ بمستوى اللياقة. تم دمج <b>هندسة البيانات</b> لحساب مؤشر كتلة الجسم وضغط النبض بدقة.",
+        "brief_txt": "يعتمد النظام على نموذج <b>التعلم العميق (MLP)</b> للتنبؤ بمستوى اللياقة. تم دمج <b>هندسة البيانات</b> لحساب مؤشر كتلة الجسم وضغط النبض.",
         "dev_h": "👨‍💻 المطور",
         "btn": "تشغيل التحليل واستخراج التقرير ✨",
         "pdf_btn": "📥 تحميل التقرير الرسمي (PDF)",
@@ -182,38 +186,26 @@ texts = {
 }
 
 # ==========================================
-# 5. السايد بار (The Master Sidebar)
+# 5. السايد بار
 # ==========================================
 with st.sidebar:
-    st.markdown('<div class="sidebar-header">', unsafe_allow_html=True)
-    st.markdown('<div class="logo-text">HEALTH AI</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    
+    st.markdown('<div class="sidebar-header"><div class="logo-text">HEALTH AI</div></div>', unsafe_allow_html=True)
     lang = st.radio("🌐 Language / اللغة", ("English", "العربية"))
     t = texts[lang]
-    
     st.markdown("---")
     st.subheader(t["brief_h"])
     st.markdown(f'<div class="about-box">{t["brief_txt"]}</div>', unsafe_allow_html=True)
-    
     st.markdown("---")
     st.subheader(t["dev_h"])
     st.markdown(f"**Ahmed Khaled Gamal**")
-    
     st.markdown(f"""
-        <a href="https://www.linkedin.com/in/k-ahmed-auc/" class="social-link linkedin" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="25"> LinkedIn
-        </a>
-        <a href="https://github.com/ahmedk-gamal" class="social-link github" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" width="25"> GitHub
-        </a>
+        <a href="https://www.linkedin.com/in/k-ahmed-auc/" class="social-link linkedin" target="_blank">LinkedIn</a>
+        <a href="https://github.com/ahmedk-gamal" class="social-link github" target="_blank">GitHub</a>
     """, unsafe_allow_html=True)
 
 # ==========================================
-# 6. المحتوى الرئيسي (Main UI) - القلب فوق كلمة HEALTH
+# 6. المحتوى الرئيسي
 # ==========================================
-
-# حاوية اللوجو والعنوان الرئيسي
 st.markdown('<div class="main-header-container">', unsafe_allow_html=True)
 col_l, col_m, col_r = st.columns([1, 1, 1])
 with col_m:
@@ -223,7 +215,7 @@ st.markdown(f'<div class="main-title-text">🧬 {t["title"]}</div>', unsafe_allo
 st.markdown('</div>', unsafe_allow_html=True)
 
 if model is None:
-    st.error("Model files (keras/pkl) not found!"); st.stop()
+    st.error("Model files not found!"); st.stop()
 
 with st.form("health_form"):
     c1, c2 = st.columns(2)
@@ -240,11 +232,10 @@ with st.form("health_form"):
         stp = st.number_input(t["labels"][8], 0, 100, 35)
         jmp = st.number_input(t["labels"][9], 50.0, 350.0, 210.0)
         bnd = st.number_input(t["labels"][10], -20.0, 50.0, 15.0)
-    
     run_btn = st.form_submit_button(t["btn"])
 
 # ==========================================
-# 7. منطق النتائج (Results Logic)
+# 7. منطق النتائج والتقرير (تم تعديل الجزء الأخير هنا)
 # ==========================================
 if run_btn:
     g_val = 0 if (gender in ["Male", "ذكر"]) else 1
@@ -267,9 +258,24 @@ if run_btn:
     })
     st.table(plan_df)
     
-    sum_data = {t["labels"][0]: age, "BMI": f"{bmi:.2f}", t["cat"]: t["classes"][pred_idx]}
-    pdf_bytes = create_pdf(t, sum_data, plan_df)
-    st.download_button(t["pdf_btn"], data=pdf_bytes, file_name="Health_Report.pdf")
+    # تحضير بيانات الـ PDF بمفاتيح إنجليزية ثابتة لتجنب الـ Encoding Error
+    pdf_summary = {
+        "Age": age,
+        "BMI Score": f"{bmi:.2f}",
+        "Pulse Pressure": pp,
+        "Fitness Category": t["classes"][pred_idx]
+    }
+    
+    # إنشاء ملف الـ PDF
+    pdf_bytes = create_pdf(pdf_summary)
+    
+    # زر التحميل
+    st.download_button(
+        label=t["pdf_btn"], 
+        data=pdf_bytes, 
+        file_name="Health_Report.pdf",
+        mime="application/pdf"
+    )
 
 st.markdown("---")
 st.caption("© 2026 Ahmed Khaled Gamal | All Rights Reserved")
