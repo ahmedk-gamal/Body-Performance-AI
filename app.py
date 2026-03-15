@@ -655,4 +655,3 @@ if run_btn:
 
 st.markdown("---")
 st.caption("© 2026 Ahmed Khaled Gamal | All Rights Reserved")
-```
