@@ -6,3 +6,4 @@ tensorflow
 streamlit-lottie
 requests
 fpdf
+fpdf2
