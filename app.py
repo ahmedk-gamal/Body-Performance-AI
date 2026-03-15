@@ -92,9 +92,9 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. الدوال المساعدة (تم تعديل دالة الـ PDF هنا)
+# 3. الدوال المساعدة (تحديث دالة الـ PDF لدعم التوصيات)
 # ==========================================
-def create_pdf(summary):
+def create_pdf(summary, plan_df):
     pdf = FPDF()
     pdf.add_page()
     
@@ -102,7 +102,7 @@ def create_pdf(summary):
     pdf.set_fill_color(255, 45, 85)
     pdf.rect(0, 0, 65, 300, 'F')
     
-    # نصوص الهوية (بالإنجليزي لتجنب مشاكل الخطوط)
+    # نصوص الهوية
     pdf.set_font("Arial", 'B', 16); pdf.set_text_color(255, 255, 255)
     pdf.text(10, 30, "HEALTH AI")
     pdf.set_font("Arial", '', 10); pdf.text(10, 50, "DEVELOPER:")
@@ -111,20 +111,38 @@ def create_pdf(summary):
     # عنوان التقرير
     pdf.set_xy(75, 30); pdf.set_text_color(0, 0, 0); pdf.set_font("Arial", 'B', 22)
     pdf.cell(130, 10, "OFFICIAL HEALTH REPORT", ln=True)
-    pdf.ln(15)
+    pdf.ln(10)
     
-    # كتابة النتائج مع حماية من الـ Unicode Errors
-    pdf.set_font("Arial", 'B', 12)
+    # كتابة النتائج الحيوية
+    pdf.set_font("Arial", 'B', 14); pdf.cell(130, 10, "BIOMETRIC ANALYSIS", ln=True)
+    pdf.set_font("Arial", 'B', 11)
     for k, v in summary.items():
-        # تنظيف النص من أي حروف غير مدعومة (مثل العربي)
-        safe_k = str(k).encode('latin-1', 'ignore').decode('latin-1')
-        safe_v = str(v).encode('latin-1', 'ignore').decode('latin-1')
-        
         pdf.set_x(75)
-        pdf.cell(50, 10, f"{safe_k}:", 0)
-        pdf.set_font("Arial", '', 12)
-        pdf.cell(80, 10, f"{safe_v}", ln=True)
-        pdf.set_font("Arial", 'B', 12)
+        pdf.cell(50, 8, f"{k}:", 0)
+        pdf.set_font("Arial", '', 11)
+        pdf.cell(80, 8, f"{str(v)}", ln=True)
+        pdf.set_font("Arial", 'B', 11)
+    
+    pdf.ln(10)
+    
+    # إضافة جدول التوصيات للـ PDF
+    pdf.set_x(75); pdf.set_font("Arial", 'B', 14)
+    pdf.cell(130, 10, "YOUR WEEKLY HEALTH PLAN", ln=True)
+    pdf.ln(2)
+    
+    pdf.set_font("Arial", '', 10)
+    for index, row in plan_df.iterrows():
+        pdf.set_x(75)
+        # تنظيف النصوص لضمان التوافق (English only for PDF Stability)
+        day = str(row[0]).split(' / ')[0] # نأخذ الجزء الإنجليزي فقط للـ PDF
+        work = str(row[1]).split(' / ')[0]
+        nutri = str(row[2]).split(' / ')[0]
+        
+        pdf.set_font("Arial", 'B', 10)
+        pdf.cell(130, 6, f"> {day}:", ln=True)
+        pdf.set_x(80); pdf.set_font("Arial", '', 10)
+        pdf.multi_cell(125, 5, f"Workout: {work} | Nutrition: {nutri}", border=0)
+        pdf.ln(2)
         
     return bytes(pdf.output())
 
@@ -160,7 +178,7 @@ texts = {
         "bmi_lab": "BMI Score",
         "pp_lab": "Pulse Pressure",
         "classes": ['A (Excellent)', 'B (Good)', 'C (Fair)', 'D (Poor)'],
-        "days": ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
+        "days": ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         "workouts": ["Push Day", "Pull Day", "Legs Day", "Recovery", "HIIT", "Power", "Rest"],
         "nutrition": ["High Protein", "High Protein", "Carb Load", "Vitamins", "Low Carb", "Fiber", "Cheat Meal"],
         "advice": ["Hydrate", "Stretch", "8h Sleep", "Walk", "Focus", "Intensity", "Relax"]
@@ -199,8 +217,8 @@ with st.sidebar:
     st.subheader(t["dev_h"])
     st.markdown(f"**Ahmed Khaled Gamal**")
     st.markdown(f"""
-        <a href="https://www.linkedin.com/in/k-ahmed-auc/" class="social-link linkedin" target="_blank">LinkedIn</a>
-        <a href="https://github.com/ahmedk-gamal" class="social-link github" target="_blank">GitHub</a>
+        <a href="https://www.linkedin.com/in/k-ahmed-auc/" class="social-link" target="_blank">LinkedIn</a>
+        <a href="https://github.com/ahmedk-gamal" class="social-link" target="_blank">GitHub</a>
     """, unsafe_allow_html=True)
 
 # ==========================================
@@ -235,7 +253,7 @@ with st.form("health_form"):
     run_btn = st.form_submit_button(t["btn"])
 
 # ==========================================
-# 7. منطق النتائج والتقرير (تم تعديل الجزء الأخير هنا)
+# 7. منطق النتائج والتقرير
 # ==========================================
 if run_btn:
     g_val = 0 if (gender in ["Male", "ذكر"]) else 1
@@ -252,24 +270,26 @@ if run_btn:
     m2.metric(t["bmi_lab"], f"{bmi:.2f}")
     m3.metric(t["pp_lab"], pp)
     
+    # بناء جدول التوصيات للواجهة
     plan_df = pd.DataFrame({
-        "Day / اليوم": t["days"], "Workout / التمرين": t["workouts"],
-        "Nutrition / التغذية": t["nutrition"], "Advice / نصيحة": t["advice"]
+        "Day / اليوم": t["days"], 
+        "Workout / التمرين": t["workouts"],
+        "Nutrition / التغذية": t["nutrition"], 
+        "Advice / نصيحة": t["advice"]
     })
     st.table(plan_df)
     
-    # تحضير بيانات الـ PDF بمفاتيح إنجليزية ثابتة لتجنب الـ Encoding Error
+    # بيانات الـ PDF بمفاتيح إنجليزية لضمان الثبات
     pdf_summary = {
         "Age": age,
         "BMI Score": f"{bmi:.2f}",
         "Pulse Pressure": pp,
-        "Fitness Category": t["classes"][pred_idx]
+        "Fitness Level": t["classes"][pred_idx]
     }
     
-    # إنشاء ملف الـ PDF
-    pdf_bytes = create_pdf(pdf_summary)
+    # استدعاء الدالة المحدثة التي ترسم الجدول داخل الـ PDF
+    pdf_bytes = create_pdf(pdf_summary, plan_df)
     
-    # زر التحميل
     st.download_button(
         label=t["pdf_btn"], 
         data=pdf_bytes, 
