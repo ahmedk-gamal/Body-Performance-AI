@@ -68,6 +68,26 @@ st.markdown("""
     .github   { color: #333 !important; }
     th { background-color: var(--apple-red) !important; color: white !important; text-align: center !important; }
     [data-testid="stMetricValue"] { color: var(--apple-red); font-weight: 800; }
+
+    /* ── Placeholder styling for empty number inputs ── */
+    /* Shows a hint when the field has no value yet      */
+    [data-testid="stNumberInput"] input:placeholder-shown {
+        color: #9e9e9e;
+        font-style: italic;
+    }
+    /* Highlight empty inputs with a subtle border */
+    [data-testid="stNumberInput"] input[value=""] {
+        border: 1.5px dashed #ff2d55 !important;
+        border-radius: 8px;
+    }
+    /* Caption hint under each empty field */
+    .field-hint {
+        font-size: 11px;
+        color: #9e9e9e;
+        margin-top: -12px;
+        margin-bottom: 6px;
+        font-style: italic;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -111,7 +131,7 @@ def create_pdf(summary, plan_df=None, fitness_class_idx=0):
     )
 
     styles  = getSampleStyleSheet()
-    W = 17.4 * cm   # عرض المحتوى
+    W = 17.4 * cm
 
     # ===== Styles =====
     title_style = ParagraphStyle(
@@ -162,56 +182,42 @@ def create_pdf(summary, plan_df=None, fitness_class_idx=0):
     story.append(Paragraph("Health Metrics", section_style))
     story.append(HRFlowable(width=W, thickness=1.5, color=RED, spaceAfter=6))
 
-    # --- Gauge Chart للـ BMI ---
     def make_bmi_gauge(bmi_val):
         d = Drawing(160, 110)
-
         cx, cy, r = 80, 55, 55
-        # خلفية رمادية
         d.add(Wedge(cx, cy, r, 180, 360, fillColor=colors.HexColor("#eeeeee"), strokeColor=None))
-
-        # Zones
         zones = [
-            (180, 210, colors.HexColor("#2196f3")),   # Underweight
-            (210, 252, colors.HexColor("#4caf50")),   # Normal
-            (252, 288, colors.HexColor("#ff9800")),   # Overweight
-            (288, 360, colors.HexColor("#f44336")),   # Obese
+            (180, 210, colors.HexColor("#2196f3")),
+            (210, 252, colors.HexColor("#4caf50")),
+            (252, 288, colors.HexColor("#ff9800")),
+            (288, 360, colors.HexColor("#f44336")),
         ]
         for start, end, c in zones:
             d.add(Wedge(cx, cy, r, start, end, fillColor=c, strokeColor=WHITE, strokeWidth=1))
-
-        # Inner white circle
         d.add(Circle(cx, cy, r*0.55, fillColor=WHITE, strokeColor=None))
-
-        # Needle
         bmi_clamped = max(15, min(bmi_val, 40))
         angle_deg = 180 + ((bmi_clamped - 15) / 25) * 180
+        import math
         angle_rad = math.radians(angle_deg)
         nx = cx + (r * 0.48) * math.cos(angle_rad)
         ny = cy + (r * 0.48) * math.sin(angle_rad)
         d.add(Line(cx, cy, nx, ny, strokeColor=DARK, strokeWidth=2.5))
         d.add(Circle(cx, cy, 5, fillColor=DARK, strokeColor=None))
-
-        # BMI value text
         d.add(String(cx, cy - 20, f"{bmi_val:.1f}", fontSize=13,
                      fillColor=DARK, textAnchor='middle', fontName="Helvetica-Bold"))
         d.add(String(cx, cy - 32, "BMI", fontSize=9,
                      fillColor=colors.gray, textAnchor='middle', fontName="Helvetica"))
-
-        # Labels
-        labels = [("15", 180), ("Normal", 225), ("30", 270), ("40", 360)]
         for lbl, ang in [("15", 182), ("30", 270), ("40", 358)]:
-            ar = math.radians(ang)
-            lx = cx + (r + 8) * math.cos(ar)
-            ly = cy + (r + 8) * math.sin(ar)
+            import math as m2
+            ar = m2.radians(ang)
+            lx = cx + (r + 8) * m2.cos(ar)
+            ly = cy + (r + 8) * m2.sin(ar)
             d.add(String(lx, ly, lbl, fontSize=7, fillColor=colors.gray,
                          textAnchor='middle', fontName="Helvetica"))
-
         return d
 
     bmi_val = float(summary.get("BMI Score", 22))
 
-    # BMI category label
     if bmi_val < 18.5:
         bmi_cat, bmi_color = "Underweight", colors.HexColor("#2196f3")
     elif bmi_val < 25:
@@ -228,7 +234,6 @@ def create_pdf(summary, plan_df=None, fitness_class_idx=0):
 
     gauge_drawing = make_bmi_gauge(bmi_val)
 
-    # --- Metrics Table ---
     metrics_data = [["Metric", "Value"]]
     for k, v in summary.items():
         metrics_data.append([str(k), str(v)])
@@ -295,17 +300,12 @@ def create_pdf(summary, plan_df=None, fitness_class_idx=0):
         bw = float(W) - 20
         bh = 18
         by = 35
-
-        # Track
         d.add(Rect(10, by, bw, bh, rx=9, ry=9,
                    fillColor=colors.HexColor("#eeeeee"), strokeColor=None))
-        # Fill
         fill_w = bw * bar_fill[idx]
         if fill_w > 0:
             d.add(Rect(10, by, fill_w, bh, rx=9, ry=9,
                        fillColor=fitness_colors[idx], strokeColor=None))
-
-        # Grade markers
         for i, lbl in enumerate(["D", "C", "B", "A"]):
             mx = 10 + bw * bar_fill[3 - i]
             mc = fitness_colors[3 - i]
@@ -314,8 +314,6 @@ def create_pdf(summary, plan_df=None, fitness_class_idx=0):
                          strokeColor=WHITE, strokeWidth=1.5))
             d.add(String(mx, by + bh/2 - 4, lbl, fontSize=8,
                          fillColor=WHITE, textAnchor='middle', fontName="Helvetica-Bold"))
-
-        # Label
         label_txt = fitness_labels[idx]
         d.add(String(10, by + bh + 10, f"Category: {label_txt}",
                      fontSize=10, fillColor=fitness_colors[idx],
@@ -364,12 +362,11 @@ def create_pdf(summary, plan_df=None, fitness_class_idx=0):
     story.append(Spacer(1, 0.5*cm))
 
     # ==========================================
-    # SECTION 4: CONTACT + QR + LOGOS
+    # SECTION 4: CONTACT + QR
     # ==========================================
     story.append(HRFlowable(width=W, thickness=1, color=colors.HexColor("#dddddd"), spaceAfter=8))
     story.append(Paragraph("Developer Contact", section_style))
 
-    # --- QR Code ---
     qr_linkedin_url = "https://www.linkedin.com/in/k-ahmed-auc/"
     qr = qrcode.QRCode(version=1, box_size=4, border=2,
                        error_correction=qrcode.constants.ERROR_CORRECT_M)
@@ -381,12 +378,10 @@ def create_pdf(summary, plan_df=None, fitness_class_idx=0):
     qr_buffer.seek(0)
     qr_rl = RLImage(qr_buffer, width=2.5*cm, height=2.5*cm)
 
-    # --- LinkedIn SVG كـ Drawing ---
     def make_linkedin_logo(size=22):
         d = Drawing(size, size)
         d.add(Rect(0, 0, size, size, rx=4, ry=4,
                    fillColor=colors.HexColor("#0077b5"), strokeColor=None))
-        # "in" بشكل مبسط
         d.add(Rect(3, 3, 4, 4, fillColor=WHITE, strokeColor=None))
         d.add(Rect(3, 9, 4, 11, fillColor=WHITE, strokeColor=None))
         d.add(Rect(9, 9, 4, 11, fillColor=WHITE, strokeColor=None))
@@ -398,7 +393,6 @@ def create_pdf(summary, plan_df=None, fitness_class_idx=0):
         d = Drawing(size, size)
         d.add(Circle(size/2, size/2, size/2,
                      fillColor=colors.HexColor("#24292e"), strokeColor=None))
-        # "G" مبسط
         d.add(Circle(size/2, size/2, size/2 - 3,
                      fillColor=colors.HexColor("#24292e"), strokeColor=WHITE, strokeWidth=1))
         d.add(String(size/2, size/2 - 4, "GH", fontSize=7,
@@ -467,9 +461,7 @@ def create_pdf(summary, plan_df=None, fitness_class_idx=0):
     story.append(contact_row)
     story.append(Spacer(1, 0.4*cm))
 
-    # ==========================================
     # FOOTER
-    # ==========================================
     footer_divider = Table([[""]], colWidths=[W], rowHeights=[2])
     footer_divider.setStyle(TableStyle([("BACKGROUND", (0,0), (-1,-1), RED)]))
     story.append(footer_divider)
@@ -515,6 +507,8 @@ texts = {
         "pdf_btn": "📥 Download PDF Report",
         "labels": ["Age","Gender","Height (cm)","Weight (kg)","Body Fat %",
                    "Systolic BP","Diastolic BP","Grip Force","Sit-ups","Jump (cm)","Flexibility"],
+        "hints":  ["e.g. 25","—","e.g. 175","e.g. 75","e.g. 20",
+                   "e.g. 120","e.g. 80","e.g. 45","e.g. 35","e.g. 210","e.g. 15"],
         "res_h": "📊 Comprehensive Results",
         "cat": "Fitness Category",
         "bmi_lab": "BMI Score",
@@ -523,7 +517,8 @@ texts = {
         "days":      ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"],
         "workouts":  ["Push Day","Pull Day","Legs Day","Recovery","HIIT","Power","Rest"],
         "nutrition": ["High Protein","High Protein","Carb Load","Vitamins","Low Carb","Fiber","Cheat Meal"],
-        "advice":    ["Hydrate","Stretch","8h Sleep","Walk","Focus","Intensity","Relax"]
+        "advice":    ["Hydrate","Stretch","8h Sleep","Walk","Focus","Intensity","Relax"],
+        "fill_warn": "⚠️ Please fill in all fields before running the analysis.",
     },
     "العربية": {
         "title": "لوحة تحكم الأداء البدني الذكية",
@@ -534,6 +529,8 @@ texts = {
         "pdf_btn": "📥 تحميل التقرير الرسمي (PDF)",
         "labels": ["العمر","الجنس","الطول (سم)","الوزن (كجم)","نسبة الدهون %",
                    "الضغط الانقباضي","الضغط الانبساطي","قوة القبضة","تمارين البطن","الوثب","المرونة"],
+        "hints":  ["مثال: 25","—","مثال: 175","مثال: 75","مثال: 20",
+                   "مثال: 120","مثال: 80","مثال: 45","مثال: 35","مثال: 210","مثال: 15"],
         "res_h": "📊 النتائج والتحليلات",
         "cat": "تصنيف اللياقة",
         "bmi_lab": "مؤشر الكتلة",
@@ -542,7 +539,8 @@ texts = {
         "days":      ["السبت","الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة"],
         "workouts":  ["تمارين دفع","تمارين سحب","تمارين أرجل","استشفاء","كارديو HIIT","تمارين قوة","راحة"],
         "nutrition": ["بروتين عالي","بروتين عالي","تحميل كارب","فيتامينات","كارب منخفض","ألياف","وجبة مفتوحة"],
-        "advice":    ["شرب ماء","إطالات","نوم كافٍ","مشي","تركيز","كثافة","استشفاء"]
+        "advice":    ["شرب ماء","إطالات","نوم كافٍ","مشي","تركيز","كثافة","استشفاء"],
+        "fill_warn": "⚠️ من فضلك أدخل جميع القيم قبل تشغيل التحليل.",
     }
 }
 
@@ -593,27 +591,123 @@ if model is None:
     st.error("Model files not found!")
     st.stop()
 
+# ==========================================
+# 8. الفورم — كل الحقول value=None (فاضية)
+# ==========================================
 with st.form("health_form"):
     c1, c2 = st.columns(2)
+
     with c1:
-        age    = st.number_input(t["labels"][0], 10, 90, 25)
-        gender = st.selectbox(t["labels"][1], ["Male","Female"] if lang=="English" else ["ذكر","أنثى"])
-        h      = st.number_input(t["labels"][2], 120.0, 220.0, 175.0)
-        w      = st.number_input(t["labels"][3], 30.0, 200.0, 75.0)
-        f      = st.number_input(t["labels"][4], 5.0, 50.0, 20.0)
+        age = st.number_input(
+            t["labels"][0],
+            min_value=10, max_value=90,
+            value=None,                        # ← فاضي عند الفتح
+            placeholder=t["hints"][0],         # ← بيظهر نص تلميح
+            step=1
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][0]}</p>', unsafe_allow_html=True)
+
+        gender = st.selectbox(
+            t["labels"][1],
+            ["Male", "Female"] if lang == "English" else ["ذكر", "أنثى"],
+            index=None,                        # ← مفيش اختيار افتراضي
+            placeholder="Select gender / اختر الجنس"
+        )
+
+        h = st.number_input(
+            t["labels"][2],
+            min_value=120.0, max_value=220.0,
+            value=None,
+            placeholder=t["hints"][2],
+            step=0.5
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][2]}</p>', unsafe_allow_html=True)
+
+        w = st.number_input(
+            t["labels"][3],
+            min_value=30.0, max_value=200.0,
+            value=None,
+            placeholder=t["hints"][3],
+            step=0.5
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][3]}</p>', unsafe_allow_html=True)
+
+        f = st.number_input(
+            t["labels"][4],
+            min_value=5.0, max_value=50.0,
+            value=None,
+            placeholder=t["hints"][4],
+            step=0.1
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][4]}</p>', unsafe_allow_html=True)
+
     with c2:
-        s_bp = st.number_input(t["labels"][5], 80, 200, 120)
-        d_bp = st.number_input(t["labels"][6], 50, 120, 80)
-        grp  = st.number_input(t["labels"][7], 10.0, 100.0, 45.0)
-        stp  = st.number_input(t["labels"][8], 0, 100, 35)
-        jmp  = st.number_input(t["labels"][9], 50.0, 350.0, 210.0)
-        bnd  = st.number_input(t["labels"][10], -20.0, 50.0, 15.0)
+        s_bp = st.number_input(
+            t["labels"][5],
+            min_value=80, max_value=200,
+            value=None,
+            placeholder=t["hints"][5],
+            step=1
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][5]}</p>', unsafe_allow_html=True)
+
+        d_bp = st.number_input(
+            t["labels"][6],
+            min_value=50, max_value=120,
+            value=None,
+            placeholder=t["hints"][6],
+            step=1
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][6]}</p>', unsafe_allow_html=True)
+
+        grp = st.number_input(
+            t["labels"][7],
+            min_value=10.0, max_value=100.0,
+            value=None,
+            placeholder=t["hints"][7],
+            step=0.5
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][7]}</p>', unsafe_allow_html=True)
+
+        stp = st.number_input(
+            t["labels"][8],
+            min_value=0, max_value=100,
+            value=None,
+            placeholder=t["hints"][8],
+            step=1
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][8]}</p>', unsafe_allow_html=True)
+
+        jmp = st.number_input(
+            t["labels"][9],
+            min_value=50.0, max_value=350.0,
+            value=None,
+            placeholder=t["hints"][9],
+            step=0.5
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][9]}</p>', unsafe_allow_html=True)
+
+        bnd = st.number_input(
+            t["labels"][10],
+            min_value=-20.0, max_value=50.0,
+            value=None,
+            placeholder=t["hints"][10],
+            step=0.5
+        )
+        st.markdown(f'<p class="field-hint">{t["hints"][10]}</p>', unsafe_allow_html=True)
+
     run_btn = st.form_submit_button(t["btn"])
 
 # ==========================================
-# 8. النتائج والتقرير
+# 9. النتائج والتقرير
 # ==========================================
 if run_btn:
+    # ── التحقق إن كل الحقول اتملت ──
+    missing = any(v is None for v in [age, h, w, f, s_bp, d_bp, grp, stp, jmp, bnd]) or gender is None
+    if missing:
+        st.warning(t["fill_warn"])
+        st.stop()
+
     g_val = 0 if (gender in ["Male", "ذكر"]) else 1
     bmi   = w / ((h / 100) ** 2)
     pp    = s_bp - d_bp
