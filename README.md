@@ -69,11 +69,11 @@ The model was trained on a comprehensive dataset of 13,393 records, including ph
 
 
 ## 🔮 Future Roadmap
-[ ] Integration of full Arabic language support.
+- Integration of full Arabic language support.
 
-[ ] Leveraging Computer Vision for real-time exercise posture correction.
+- Leveraging Computer Vision for real-time exercise posture correction.
 
-[ ] Developing a historical Dashboard to track user performance progress over time.
+- Developing a historical Dashboard to track user performance progress over time.
 
 
 ## 👨‍💼 Author
