@@ -1,6 +1,0 @@
-cd Body_Performance_AI
-git init
-git add .
-git commit -m "Initial commit: Body Performance AI v1.0"
-git remote add origin https://github.com/YOUR_USERNAME/Body_Performance_AI.git
-git push -u origin main
