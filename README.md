@@ -1,5 +1,7 @@
 ## 🏋️‍♂️ Body Performance AI: Deep Learning Classification & Advisory System
 
+
+
 <p align="center">
 <img src="https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python" alt="Python">
 <img src="https://img.shields.io/badge/TensorFlow-2.17-orange?style=for-the-badge&logo=tensorflow" alt="TensorFlow">
@@ -7,8 +9,10 @@
 <img src="https://img.shields.io/badge/Maintained%3F-Yes-green?style=for-the-badge" alt="Maintained">
 </p>
 
+
 ## 🌟 Overview
 This project is an interactive AI platform designed for physical fitness assessment, developed as part of integrating data science into human performance analysis. The system analyzes biometric and athletic measurements to classify users into four performance tiers (A, B, C, D), while providing personalized health and exercise recommendations based on the results and Body Mass Index (BMI).
+
 
 ## 🏗️ Technical Architecture
 🧠 Model Architecture
@@ -22,12 +26,14 @@ Regularization: Implemented Dropout (0.5) and Early Stopping to ensure model sta
 
 Optimizer: Adam optimizer paired with ReduceLROnPlateau scheduling to achieve optimal convergence and accuracy.
 
+
 ## 🧪 Feature Engineering
 Model performance was enhanced through the innovation of additional physiological indicators:
 
 BMI (Body Mass Index): Correlating weight and height to provide deeper physiological context.
 
 Pulse Pressure: Calculating the delta between systolic and diastolic blood pressure as an indicator of cardiovascular efficiency.
+
 
 ## 💻 The Web App
 The application is deployed via Streamlit, offering a seamless user experience:
@@ -38,7 +44,9 @@ Instant classification of physical performance tiers.
 
 Dynamic advisory generation based on the user's health status (Body Fat % and BMI).
 
-🔗 Live Demo: Body Performance AI App
+🔗 Live Demo: Body Performance AI App https://body-performance-ai-e2avrvegv2mcxnso7bbsvu.streamlit.app/
+
+
 
 ## 🚀 Quick Start
 Clone the Repository:
@@ -54,8 +62,11 @@ Run the Application:
 
 Bash
 streamlit run app.py
+
+
 ## 📊 Dataset
 The model was trained on a comprehensive dataset of 13,393 records, including physical tests (Grip force, Sit-ups, Broad jump) and biometric measurements (Blood pressure, Body fat percentage).
+
 
 ## 🔮 Future Roadmap
 [ ] Integration of full Arabic language support.
@@ -64,8 +75,11 @@ The model was trained on a comprehensive dataset of 13,393 records, including ph
 
 [ ] Developing a historical Dashboard to track user performance progress over time.
 
+
 ## 👨‍💼 Author
 Ahmed Khaled Gamal Hossam Eldien
-Senior Machine Learning Engineer & Property Consultant
+
+Machine Learning Engineer & Investment Consultant
+
 
 ## ⭐️ If you find this work helpful, please support the project with a Star on GitHub!
