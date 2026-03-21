@@ -485,11 +485,23 @@ def load_lottie(url):
 
 @st.cache_resource
 def load_ai_models():
+    import os
+    # الحصول على مسار المجلد الحالي اللي فيه ملف app.py
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    
+    # دمج المسار مع أسماء الملفات
+    model_path = os.path.join(base_path, 'body_performance_model.keras')
+    scaler_path = os.path.join(base_path, 'scaler.pkl')
+    
     try:
-        m = load_model('body_performance_model.keras')
-        s = joblib.load('scaler.pkl')
+        # تحميل الموديل والسكيلر باستخدام المسار الكامل
+        m = load_model(model_path)
+        s = joblib.load(scaler_path)
         return m, s
-    except: return None, None
+    except Exception as e:
+        # عرض الخطأ لو حصل عشان تعرف المشكلة فين بالظبط
+        st.error(f"Error loading files: {e}")
+        return None, None
 
 heart_anim = load_lottie("https://assets5.lottiefiles.com/packages/lf20_m6cu96.json")
 model, scaler = load_ai_models()
